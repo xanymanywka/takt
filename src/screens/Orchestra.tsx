@@ -21,6 +21,22 @@ export const Orchestra: React.FC = () => {
 
   const getStateLabel = (state: JobState) => capitalize(jobStateLabel(state));
 
+  // Ворктри исполнителя лежит в ~/orchestra/<репо>/<имя>: проект — предпоследний сегмент.
+  const splitWorktree = (worktree: string) => {
+    const parts = worktree.replace(/\/+$/, '').split('/').filter(Boolean);
+    const dir = parts[parts.length - 1] || worktree;
+    const repo = parts.length >= 2 ? parts[parts.length - 2] : projectName;
+    return { repo, dir };
+  };
+
+  const startedFmt = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
+  const formatStarted = (iso: string) => {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? iso : startedFmt.format(d);
+  };
+
+  const canKill = (state: JobState) => state === 'running' || state === 'asking' || state === 'limit';
+
   return (
     <main className="main">
       <div className="top">
@@ -74,13 +90,17 @@ export const Orchestra: React.FC = () => {
               const steps = job.steps || [];
               const doneCount = steps.filter((s) => s.done).length;
               const isAsking = job.state === 'asking';
+              const { repo, dir } = splitWorktree(job.worktree);
 
               return (
                 <tr key={job.name}>
                   <td>
-                    <b>{projectName}</b>
-                    <span style={{ display: 'block', color: 'var(--muted)', fontSize: '13px' }}>
-                      {job.name} ({job.worktree})
+                    <b>{repo}</b>
+                    <span
+                      style={{ display: 'block', color: 'var(--muted)', fontSize: '13px' }}
+                      title={job.worktree}
+                    >
+                      {job.name} · {dir}
                     </span>
                   </td>
                   <td>
@@ -113,10 +133,8 @@ export const Orchestra: React.FC = () => {
                       {getStateLabel(job.state)}
                     </span>
                   </td>
-                  <td>
-                    {doneCount} из {steps.length || 5}
-                  </td>
-                  <td>{job.startedAt}</td>
+                  <td>{steps.length ? `${doneCount} из ${steps.length}` : '—'}</td>
+                  <td>{formatStarted(job.startedAt)}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'inline-flex', gap: '8px' }}>
                       {isAsking && (
@@ -128,7 +146,7 @@ export const Orchestra: React.FC = () => {
                           Ответить
                         </button>
                       )}
-                      {job.state !== 'killed' && job.state !== 'done' && (
+                      {canKill(job.state) && (
                         <button
                           type="button"
                           className="orch-btn kill"
