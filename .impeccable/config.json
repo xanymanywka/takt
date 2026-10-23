@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "montserrat",
+        "createdAt": "2026-10-23T13:37:06.000Z",
+        "reason": "user confirmed: Montserrat is the owner's chosen brand typeface (memory feedback_fonts_montserrat)"
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-I", "-m", "http.server", "4173", "--bind", "127.0.0.1", "--directory", "docs"],
+      "port": 4173
+    },
+    {
+      "name": "vite",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 1420
+    }
+  ]
+}

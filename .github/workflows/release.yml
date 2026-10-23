@@ -44,8 +44,8 @@ jobs:
         with:
           args: --target universal-apple-darwin
           tagName: ${{ github.ref_name }}
-          releaseName: "Такт ${{ github.ref_name }}"
-          releaseBody: "Скачайте `Takt_*_universal.dmg`. Приложение само предложит следующее обновление."
+          releaseName: "Takt ${{ github.ref_name }}"
+          releaseBody: "Download `Takt_*_universal.dmg`. The app will offer the next update itself."
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/design/takt-icon.svg" width="128" height="128" alt="Такт">
+  <img src="docs/design/takt-icon.svg" width="128" height="128" alt="Takt">
 </p>
 
-<h1 align="center">Такт</h1>
+<h1 align="center">Takt</h1>
 
 <p align="center">
   Desktop app for conducting coding agents.<br>
@@ -69,7 +69,7 @@ commercial products. Contact the author for commercial use.
 <a id="ukrainian"></a>
 ## Українська
 
-**Такт** замінює Emdash, Conductor, Vibe Kanban і подібні панелі однією ідеєю: ви розмовляєте
+**Takt** замінює Emdash, Conductor, Vibe Kanban і подібні панелі однією ідеєю: ви розмовляєте
 з головним агентом (Claude Code, «диригент»), а він роздає задачі виконавцям — Codex, Antigravity, Claude.
 Кожна задача живе у своїй git-ворктрі, у кожного виконавця своя картка з чесним прогресом:
 відмічені пункти приймання з `TASK-<slug>.md`, а не вигадані відсотки.
@@ -86,7 +86,7 @@ commercial products. Contact the author for commercial use.
 ### Архітектура
 
 <p align="center">
-  <img src="docs/architecture/takt-uk.svg" width="100%" alt="Як «Такт» диригує агентами: ви → інтерфейс → ядро → диригент → agents.py → виконавці → git-ворктрі">
+  <img src="docs/architecture/takt-uk.svg" width="100%" alt="Як Takt диригує агентами: ви → інтерфейс → ядро → диригент → agents.py → виконавці → git-ворктрі">
 </p>
 
 Докладно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
@@ -94,7 +94,7 @@ commercial products. Contact the author for commercial use.
 ### Встановлення
 
 1. Завантажте `Takt_<версія>_universal.dmg` з [Releases](https://github.com/xanymanywka/takt/releases/latest).
-2. Перетягніть «Такт» у «Програми». Під час першого запуску macOS попросить підтвердити відкриття застосунку не з App Store.
+2. Перетягніть Takt у «Програми». Під час першого запуску macOS попросить підтвердити відкриття застосунку не з App Store.
 3. Запустіть. Майстер першого старту перевірить `claude`, `codex`, `agy`, `tmux`, `codexbar` і запропонує поставити те, чого бракує.
 
 ### Збирання з джерел
@@ -120,7 +120,7 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 <a id="russian"></a>
 ## Русский
 
-**Такт** заменяет Emdash, Conductor, Vibe Kanban и подобные панели одной идеей: вы разговариваете
+**Takt** заменяет Emdash, Conductor, Vibe Kanban и подобные панели одной идеей: вы разговариваете
 с главным агентом (Claude Code, «дирижёр»), а он раздаёт задачи исполнителям — Codex, Antigravity, Claude.
 Каждая задача живёт в своей git-ворктри, у каждого исполнителя своя карточка с реальным прогрессом:
 отмеченные пункты приёмки из `TASK-<slug>.md`, а не выдуманные проценты.
@@ -137,7 +137,7 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 ### Архитектура
 
 <p align="center">
-  <img src="docs/architecture/takt-ru.svg" width="100%" alt="Как «Такт» дирижирует агентами: вы → интерфейс → ядро → дирижёр → agents.py → исполнители → git-ворктри">
+  <img src="docs/architecture/takt-ru.svg" width="100%" alt="Как Takt дирижирует агентами: вы → интерфейс → ядро → дирижёр → agents.py → исполнители → git-ворктри">
 </p>
 
 Подробно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
@@ -145,7 +145,7 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 ### Установка
 
 1. Скачайте `Takt_<версия>_universal.dmg` из [Releases](https://github.com/xanymanywka/takt/releases/latest).
-2. Перетащите «Такт» в «Программы». При первом запуске macOS спросит разрешение на открытие приложения не из App Store.
+2. Перетащите Takt в «Программы». При первом запуске macOS спросит разрешение на открытие приложения не из App Store.
 3. Запустите. Мастер первого старта проверит `claude`, `codex`, `agy`, `tmux`, `codexbar` и предложит поставить недостающее.
 
 ### Сборка из исходников

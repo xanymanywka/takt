@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1380 900" width="1380" height="900" font-family="Montserrat, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Как «Такт» дирижирует агентами">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1380 900" width="1380" height="900" font-family="Montserrat, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="Как Takt дирижирует агентами">
 <style>
   @keyframes flow { to { stroke-dashoffset: -28; } }
   @keyframes pulse { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
@@ -19,9 +19,9 @@
 </style>
 <rect width="1380" height="900" rx="24" fill="#080808"/>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C8FF00"/></marker></defs>
-<text class="title" x="40" y="48">Как «Такт» дирижирует агентами</text>
+<text class="title" x="40" y="48">Как Takt дирижирует агентами</text>
 <rect class="region" x="368" y="236" width="888" height="300" rx="18"/>
-<text class="rlab" x="382" y="256">Десктоп-приложение «Такт» (Tauri)</text>
+<text class="rlab" x="382" y="256">Десктоп-приложение Takt (Tauri)</text>
 <rect class="region" x="1028" y="606" width="228" height="286" rx="18"/>
 <text class="rlab" x="1042" y="626">~/.orchestra</text>
 <path class="edge main" d="M244,306.0 L390,306.0"/>
@@ -53,10 +53,10 @@
 <text class="elab" x="647.0" y="647.0" text-anchor="middle"><tspan x="647.0" dy="0">коммиты в</tspan><tspan x="647.0" dy="17">своей ветке</tspan></text>
 <g class="node" style="animation-delay:0ms"><rect x="60" y="270" width="184" height="72" rx="14" stroke="#8a8f98"/><text class="lab" x="76" y="301">Вы</text><text class="sub" x="76" y="324">за клавиатурой</text></g>
 <g class="node" style="animation-delay:70ms"><rect x="390" y="96" width="184" height="72" rx="14" stroke="#8a8f98"/><text class="lab" x="406" y="127">Телефон</text><text class="sub" x="406" y="150">PWA в той же сети</text></g>
-<g class="node" style="animation-delay:140ms"><rect x="390" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="406" y="301">Интерфейс Такта</text><text class="sub" x="406" y="324">React 19 · две темы</text></g>
+<g class="node" style="animation-delay:140ms"><rect x="390" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="406" y="301">Интерфейс Takt</text><text class="sub" x="406" y="324">React 19 · две темы</text></g>
 <g class="node" style="animation-delay:210ms"><rect x="390" y="444" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="406" y="475">Панель результата</text><text class="sub" x="406" y="498">webview, картинки</text></g>
 <g class="node" style="animation-delay:280ms"><rect x="720" y="96" width="184" height="72" rx="14" stroke="#7dd3fc"/><text class="lab" x="736" y="127">GitHub Releases</text><text class="sub" x="736" y="150">подписанный latest.json</text></g>
-<g class="node" style="animation-delay:350ms"><rect x="720" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="736" y="301">Ядро Такта</text><text class="sub" x="736" y="324">Rust · Tauri 2</text></g>
+<g class="node" style="animation-delay:350ms"><rect x="720" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="736" y="301">Ядро Takt</text><text class="sub" x="736" y="324">Rust · Tauri 2</text></g>
 <g class="node" style="animation-delay:420ms"><rect x="1050" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="1066" y="301">Дирижёр</text><text class="sub" x="1066" y="324">claude -p stream-json</text></g>
 <g class="node" style="animation-delay:490ms"><rect x="720" y="444" width="184" height="72" rx="14" stroke="#f0abfc"/><text class="lab" x="736" y="475">Память дирижёра</text><text class="sub" x="736" y="498">промпт + id сессий</text></g>
 <g class="node" style="animation-delay:560ms"><rect x="1050" y="640" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="1066" y="671">agents.py</text><text class="sub" x="1066" y="694">оркестратор tmux</text></g>
