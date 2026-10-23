@@ -7,7 +7,7 @@ import type {
 } from './ipc';
 
 export const MOCK_PROJECTS: Project[] = [
-  { name: 'Такт', path: '~/orchestra/orchestra', group: 'takt', color: '#9b86d6' },
+  { name: 'Takt', path: '~/orchestra/orchestra', group: 'takt', color: '#9b86d6' },
   { name: 'Nova · CRM', path: '~/projects/nova-crm', group: 'nova', color: '#9b86d6' },
   { name: 'Nova · Beds', path: '~/projects/nova-beds', group: 'nova', color: '#9b86d6' },
   { name: 'OFC · Роадмап', path: '~/projects/ofc', group: 'ofc', color: '#7fb98f' },
@@ -94,54 +94,12 @@ export const MOCK_SETUP: Setup = {
     {
       id: 'claude',
       found: true,
-      loggedIn: true,
-      account: 'Cloudflare: Naga Express, Pages и D1',
-      version: '0.2.32',
+      loggedIn: false,
+      account: 'подписка Max, xanymanywka',
+      version: '2.0.32',
       statusText: 'вход истёк, откроем окно входа',
       warn: true,
-      agents: { claude: true, codex: true, agy: false },
-    },
-    {
-      id: 'codex',
-      found: true,
-      loggedIn: true,
-      account: 'OpenAI Codex (CLI)',
-      version: '0.1.0',
-      statusText: 'вошли',
-      agents: { claude: true, codex: true, agy: true },
-    },
-    {
-      id: 'agy',
-      found: true,
-      loggedIn: true,
-      account: 'Antigravity CLI',
-      version: '2.0.0',
-      statusText: 'вошли',
-      agents: { claude: true, codex: true, agy: true },
-    },
-    {
-      id: 'tmux',
-      found: true,
-      loggedIn: true,
-      account: 'tmux 3.4',
-      statusText: 'установлен',
-      agents: { claude: true, codex: true, agy: true },
-    },
-    {
-      id: 'git',
-      found: true,
-      loggedIn: true,
-      account: 'git 2.48.0',
-      statusText: 'установлен',
-      agents: { claude: true, codex: true, agy: true },
-    },
-    {
-      id: 'codexbar',
-      found: true,
-      loggedIn: true,
-      account: 'codexbar 0.9.1',
-      statusText: 'установлен',
-      agents: { claude: true, codex: true, agy: true },
+      agents: { claude: true, codex: false, agy: false },
     },
   ],
   ssh: [
@@ -163,6 +121,9 @@ export const MOCK_SETUP: Setup = {
       user: "B'JOLA, AMA Digital",
       port: 22,
       status: 'подключается',
+      identityFile: 'id_ed25519_amasite',
+      checked: 'вчера, 18:20',
+      usedBy: "B'JOLA, AMA Digital",
       agents: { claude: true, codex: true, agy: true },
     },
     {
@@ -171,6 +132,9 @@ export const MOCK_SETUP: Setup = {
       user: 'портфолио, магазин',
       port: 22,
       status: 'ключ истекает через 9 дней',
+      identityFile: 'id_rsa_game',
+      checked: 'сегодня, 11:15',
+      usedBy: 'Portfolio, Store',
       warn: true,
       agents: { claude: true, codex: true, agy: true },
     },
@@ -185,7 +149,7 @@ export const MOCK_SETUP: Setup = {
 
 let currentProjects = [...MOCK_PROJECTS];
 let currentJobs = JSON.parse(JSON.stringify(MOCK_JOBS)) as Job[];
-let currentLimits = [...MOCK_LIMITS];
+const currentLimits = [...MOCK_LIMITS];
 
 type Handler<T = unknown> = (ev: { event: string; payload: T }) => void;
 const listeners = new Map<string, Set<Handler>>();
@@ -201,6 +165,10 @@ export function emit<T>(event: string, payload: T): void {
       }
     });
   }
+}
+
+function emitJobs(): void {
+  emit('jobs://changed', JSON.parse(JSON.stringify(currentJobs)));
 }
 
 export function listen<T>(event: string, handler: (ev: { event: string; payload: T }) => void): UnlistenFn {
@@ -237,7 +205,7 @@ function ensureTimer(): void {
           ...(ptyJob.logLines || []).slice(-4),
           { time: timeStr, text: `Обновление модуля bridge.rs (итерация ${tick})` },
         ];
-        emit('jobs://changed', currentJobs);
+        emitJobs();
       }
     }
   }, 7000);
@@ -284,7 +252,7 @@ export async function job_send(name: string, text: string): Promise<void> {
         ...(job.logLines || []),
         { time: timeStr, text: `Ответ получен: ${text}` },
       ];
-      emit('jobs://changed', currentJobs);
+      emitJobs();
     }
   }
 }
@@ -295,12 +263,12 @@ export async function job_kill(name: string): Promise<void> {
   if (job) {
     job.state = 'killed';
     job.lastLine = 'Остановлено пользователем';
-    emit('jobs://changed', currentJobs);
+    emitJobs();
   }
 }
 
 export async function job_new(repo: string, name: string): Promise<string> {
-  return `~/orchestra/${repo}/${name}`;
+  return `${repo}/${name}`;
 }
 
 export async function job_run(
@@ -320,7 +288,7 @@ export async function job_run(
     steps: [{ text: 'Запуск', done: true }],
   };
   currentJobs.push(newJob);
-  emit('jobs://changed', currentJobs);
+  emitJobs();
   return newJob;
 }
 
@@ -329,7 +297,7 @@ export async function write_task(
   slug: string,
   _markdown: string
 ): Promise<string> {
-  return `~/orchestra/${worktree}/docs/TASK-${slug}.md`;
+  return `${worktree}/docs/TASK-${slug}.md`;
 }
 
 export async function limits(): Promise<Limit[]> {

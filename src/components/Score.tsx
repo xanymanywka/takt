@@ -79,12 +79,6 @@ export const Score: React.FC = () => {
               шаг {stepNum} из {steps.length || totalSteps} · <b>ждёт ответа</b>
             </>
           );
-        } else if (job.name === 'pty-bridge') {
-          statusText = (
-            <>
-              шаг 3 из 5 · <b>pty-bridge.rs</b>
-            </>
-          );
         }
 
         return (

@@ -11,8 +11,11 @@ import {
   WranglerIcon,
 } from '../components/Icons';
 import { open_in_terminal, write_instructions } from '../lib/ipc';
+import { useStore } from '../store';
 
 export const Start: React.FC = () => {
+  const setup = useStore((state) => state.setup);
+
   const [openSshRows, setOpenSshRows] = useState<Record<string, boolean>>({
     'nova-welcome-1': true,
   });
@@ -41,6 +44,19 @@ export const Start: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const sshHosts = setup?.ssh || [];
+  const tools = setup?.tools || [];
+  const mcpList = setup?.mcp || [];
+  const mcpNames = mcpList.slice(0, 3).map((m) => m.name).join(', ') || 'context7, github, nova-crm';
+  const mcpExtra = Math.max(0, mcpList.length - 3);
+
+  const getToolIcon = (id: string) => {
+    if (id === 'gh') return <GhIcon />;
+    if (id === 'coderabbit') return <CodeRabbitIcon />;
+    if (id === 'wrangler') return <WranglerIcon />;
+    return <TerminalIcon />;
   };
 
   return (
@@ -129,122 +145,80 @@ export const Start: React.FC = () => {
 
           <div className="grp">
             <h3>
-              Серверы по SSH <span>7 хостов из ~/.ssh/config</span>
+              Серверы по SSH <span>{sshHosts.length} хостов из ~/.ssh/config</span>
             </h3>
             <div className="rows">
-              {/* Row 1: nova-welcome-1 */}
-              <div
-                className={`row ${openSshRows['nova-welcome-1'] ? 'open' : ''}`}
-                onClick={() => toggleSshRow('nova-welcome-1')}
-              >
-                <span className="ic">
-                  <ServerHostIcon />
-                </span>
-                <div className="nm">
-                  nova-welcome-1
-                  <span>203.0.113.10 · пользователь deploy</span>
-                </div>
-                <div className="who">
-                  <i title="Claude">К</i>
-                  <i title="Codex">Cx</i>
-                  <i className="off" title="Antigravity: нет">
-                    Ag
-                  </i>
-                </div>
-                <div className="ok">подключается</div>
-                {openSshRows['nova-welcome-1'] && (
-                  <div className="detail">
-                    <div>
-                      <small>Ключ</small>id_ed25519_deploy
-                    </div>
-                    <div>
-                      <small>Проверено</small>сегодня, 13:48
-                    </div>
-                    <div>
-                      <small>Используют</small>Finance, Belege
-                    </div>
-                    <div>
-                      <small>Порт</small>22
-                    </div>
-                    <div className="rule">
-                      <b>Правило:</b> Antigravity на этот хост не ходит, здесь лежат файлы клиента под
-                      NDA.
-                    </div>
-                  </div>
-                )}
-              </div>
+              {sshHosts.map((host) => {
+                const isOpen = Boolean(openSshRows[host.host]);
+                const agents = host.agents || { claude: true, codex: true, agy: true };
 
-              {/* Row 2: amasite */}
-              <div
-                className={`row ${openSshRows['amasite'] ? 'open' : ''}`}
-                onClick={() => toggleSshRow('amasite')}
-              >
-                <span className="ic">
-                  <ServerHostIcon />
-                </span>
-                <div className="nm">
-                  amasite
-                  <span>web.example.com · B'JOLA, AMA Digital</span>
-                </div>
-                <div className="who">
-                  <i title="Claude">К</i>
-                  <i title="Codex">Cx</i>
-                  <i title="Antigravity">Ag</i>
-                </div>
-                <div className="ok">подключается</div>
-                {openSshRows['amasite'] && (
-                  <div className="detail">
-                    <div>
-                      <small>Ключ</small>id_ed25519_amasite
+                return (
+                  <div
+                    key={host.host}
+                    className={`row ${isOpen ? 'open' : ''}`}
+                    onClick={() => toggleSshRow(host.host)}
+                  >
+                    <span className="ic">
+                      <ServerHostIcon />
+                    </span>
+                    <div className="nm">
+                      {host.host}
+                      <span>
+                        {host.hostname || host.host}
+                        {host.user ? ` · пользователь ${host.user}` : ''}
+                      </span>
                     </div>
-                    <div>
-                      <small>Проверено</small>вчера, 18:20
+                    <div className="who">
+                      <i className={agents.claude ? undefined : 'off'} title="Claude">
+                        К
+                      </i>
+                      <i className={agents.codex ? undefined : 'off'} title="Codex">
+                        Cx
+                      </i>
+                      <i className={agents.agy ? undefined : 'off'} title="Antigravity">
+                        Ag
+                      </i>
                     </div>
-                    <div>
-                      <small>Используют</small>B'JOLA, AMA Digital
+                    <div className={`ok ${host.warn ? 'warn' : ''}`}>
+                      {host.status || 'подключается'}
                     </div>
-                    <div>
-                      <small>Порт</small>22
-                    </div>
-                  </div>
-                )}
-              </div>
 
-              {/* Row 3: little-game */}
-              <div
-                className={`row ${openSshRows['little-game'] ? 'open' : ''}`}
-                onClick={() => toggleSshRow('little-game')}
-              >
-                <span className="ic">
-                  <ServerHostIcon />
-                </span>
-                <div className="nm">
-                  little-game
-                  <span>shop.example.net · портфолио, магазин</span>
-                </div>
-                <div className="who">
-                  <i title="Claude">К</i>
-                  <i title="Codex">Cx</i>
-                  <i title="Antigravity">Ag</i>
-                </div>
-                <div className="ok warn">ключ истекает через 9 дней</div>
-                {openSshRows['little-game'] && (
-                  <div className="detail">
-                    <div>
-                      <small>Ключ</small>id_rsa_game
-                    </div>
-                    <div>
-                      <small>Проверено</small>сегодня, 11:15
-                    </div>
-                    <div>
-                      <small>Используют</small>Portfolio, Store
-                    </div>
-                    <div>
-                      <small>Порт</small>22
-                    </div>
+                    {isOpen && (
+                      <div className="detail">
+                        {host.identityFile && (
+                          <div>
+                            <small>Ключ</small>
+                            {host.identityFile}
+                          </div>
+                        )}
+                        {host.checked && (
+                          <div>
+                            <small>Проверено</small>
+                            {host.checked}
+                          </div>
+                        )}
+                        {host.usedBy && (
+                          <div>
+                            <small>Используют</small>
+                            {host.usedBy}
+                          </div>
+                        )}
+                        {host.port && (
+                          <div>
+                            <small>Порт</small>
+                            {host.port}
+                          </div>
+                        )}
+                        {host.rule && (
+                          <div className="rule">
+                            <b>Правило:</b> {host.rule}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })}
             </div>
           </div>
 
@@ -253,62 +227,40 @@ export const Start: React.FC = () => {
               Инструменты в терминале <span>нужен вход в каждый</span>
             </h3>
             <div className="rows">
-              <div className="row">
-                <span className="ic">
-                  <GhIcon />
-                </span>
-                <div className="nm">
-                  gh
-                  <span>xanymanywka и you-work, переключение по проекту</span>
-                </div>
-                <div className="who">
-                  <i title="Claude">К</i>
-                  <i title="Codex">Cx</i>
-                  <i title="Antigravity">Ag</i>
-                </div>
-                <div className="ok">вошли</div>
-              </div>
+              {tools.map((tool) => {
+                const agents = tool.agents || { claude: true, codex: true, agy: true };
+                const isWarn = tool.warn || !tool.loggedIn;
+                const statusText = tool.statusText || (tool.loggedIn ? 'вошли' : 'не выполнен вход');
 
-              <div className="row">
-                <span className="ic">
-                  <CodeRabbitIcon />
-                </span>
-                <div className="nm">
-                  coderabbit
-                  <span>ревью перед мёржем, стоп-кран на major</span>
-                </div>
-                <div className="who">
-                  <i title="Claude">К</i>
-                  <i title="Codex">Cx</i>
-                  <i title="Antigravity">Ag</i>
-                </div>
-                <div className="ok">вошли</div>
-              </div>
-
-              <div className="row">
-                <span className="ic">
-                  <WranglerIcon />
-                </span>
-                <div className="nm">
-                  wrangler
-                  <span>Cloudflare: Naga Express, Pages и D1</span>
-                </div>
-                <div className="who">
-                  <i title="Claude">К</i>
-                  <i title="Codex">Cx</i>
-                  <i className="off" title="Antigravity: нет">
-                    Ag
-                  </i>
-                </div>
-                <div className="ok warn">вход истёк, откроем окно входа</div>
-              </div>
+                return (
+                  <div key={tool.id} className="row">
+                    <span className="ic">{getToolIcon(tool.id)}</span>
+                    <div className="nm">
+                      {tool.id}
+                      {tool.account && <span>{tool.account}</span>}
+                    </div>
+                    <div className="who">
+                      <i className={agents.claude ? undefined : 'off'} title="Claude">
+                        К
+                      </i>
+                      <i className={agents.codex ? undefined : 'off'} title="Codex">
+                        Cx
+                      </i>
+                      <i className={agents.agy ? undefined : 'off'} title="Antigravity">
+                        Ag
+                      </i>
+                    </div>
+                    <div className={`ok ${isWarn ? 'warn' : ''}`}>{statusText}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           <div className="foot">
             <div className="n">
-              Серверы MCP (context7, github, nova-crm и ещё 9) уже подхвачены из конфигов Claude,
-              Codex и agy. Поправить можно позже в настройках.
+              Серверы MCP ({mcpNames}{mcpExtra > 0 ? ` и ещё ${mcpExtra}` : ''}) уже подхвачены из
+              конфигов Claude, Codex и agy. Поправить можно позже в настройках.
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button

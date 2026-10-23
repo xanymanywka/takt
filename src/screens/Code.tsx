@@ -10,7 +10,7 @@ export const Code: React.FC = () => {
   const setActiveWorktree = useStore((state) => state.setActiveWorktree);
   const jobs = useStore((state) => state.jobs);
 
-  const projectName = activeProject?.name || 'Такт';
+  const projectName = activeProject?.name || 'Takt';
 
   // Собираем список ворктри
   const worktrees = Array.from(

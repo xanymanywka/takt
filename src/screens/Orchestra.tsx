@@ -8,7 +8,7 @@ export const Orchestra: React.FC = () => {
   const jobs = useStore((state) => state.jobs);
   const killJob = useStore((state) => state.killJob);
 
-  const projectName = activeProject?.name || 'Такт';
+  const projectName = activeProject?.name || 'Takt';
 
   const getAgentLabel = (agent: string) => {
     if (agent === 'codex') return 'Codex';

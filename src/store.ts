@@ -217,32 +217,39 @@ export const useStore = create<OrchestraState>((set, get) => ({
 
         if (payload.type === 'assistant' && payload.message?.content) {
           const msgId = payload.message.id || `msg_${Date.now()}`;
+          const textBlocks = payload.message.content
+            .filter((b): b is { type: 'text'; text: string } => b.type === 'text')
+            .map((b) => b.text)
+            .join('\n\n');
+
+          if (textBlocks) {
+            set((state) => {
+              const existingIdx = state.messages.findIndex((m) => m.id === msgId);
+              if (existingIdx >= 0) {
+                const updated = [...state.messages];
+                updated[existingIdx] = {
+                  ...updated[existingIdx],
+                  text: textBlocks,
+                };
+                return { messages: updated };
+              } else {
+                return {
+                  messages: [
+                    ...state.messages,
+                    {
+                      id: msgId,
+                      role: 'assistant',
+                      who: 'Claude',
+                      text: textBlocks,
+                    },
+                  ],
+                };
+              }
+            });
+          }
+
           for (const block of payload.message.content) {
-            if (block.type === 'text') {
-              set((state) => {
-                const existingIdx = state.messages.findIndex((m) => m.id === msgId);
-                if (existingIdx >= 0) {
-                  const updated = [...state.messages];
-                  updated[existingIdx] = {
-                    ...updated[existingIdx],
-                    text: block.text,
-                  };
-                  return { messages: updated };
-                } else {
-                  return {
-                    messages: [
-                      ...state.messages,
-                      {
-                        id: msgId,
-                        role: 'assistant',
-                        who: 'Claude',
-                        text: block.text,
-                      },
-                    ],
-                  };
-                }
-              });
-            } else if (block.type === 'tool_use') {
+            if (block.type === 'tool_use') {
               let label = `вызывает ${block.name}`;
               if (block.name === 'read_file' && block.input?.path) {
                 label = `читает ${String(block.input.path)}`;

@@ -11,7 +11,7 @@ export const Lead: React.FC = () => {
     <header className="lead">
       <div>
         <h1>
-          Такт. <em>Партитура</em>, а не дашборд.
+          Takt. <em>Партитура</em>, а не дашборд.
         </h1>
         {activeProject && <p>{activeProject.name}</p>}
       </div>

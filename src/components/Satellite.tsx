@@ -75,7 +75,7 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
         <div className="ask">
           <p>{job.question || job.lastLine}</p>
           <div className="chips">
-            {(job.chips || ['Только LTR', 'RTL и LTR', 'Решу позже']).map((chip, idx) => {
+            {(job.chips || []).map((chip, idx) => {
               const isQ = chip.toLowerCase().includes('позже');
               return (
                 <button

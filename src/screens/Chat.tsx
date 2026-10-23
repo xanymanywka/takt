@@ -11,7 +11,7 @@ export const Chat: React.FC = () => {
   const messages = useStore((state) => state.messages);
   const jobs = useStore((state) => state.jobs);
 
-  const projectName = activeProject?.name || 'Такт';
+  const projectName = activeProject?.name || 'Takt';
   const workerCount = jobs.length || 2;
 
   // Если в проекте нет сообщений и нет задач

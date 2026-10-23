@@ -9,44 +9,54 @@ interface TerminalProps {
   worktree: string;
 }
 
+const darkTheme = {
+  background: '#151616',
+  foreground: '#f4f5f0',
+  cursor: '#c8ff00',
+  selectionBackground: 'rgba(200, 255, 0, 0.35)',
+  black: '#080808',
+  brightBlack: '#242626',
+  green: '#7ed69a',
+  cyan: '#6fd3c3',
+  blue: '#8ea6ff',
+  yellow: '#ffb648',
+};
+
+const lightTheme = {
+  background: '#ffffff',
+  foreground: '#0b0d0c',
+  cursor: '#3f5a00',
+  selectionBackground: 'rgba(200, 255, 0, 0.45)',
+  black: '#e6e9e0',
+  brightBlack: '#d9ded0',
+  green: '#1f7a3d',
+  cyan: '#0f7c6d',
+  blue: '#2f4fd0',
+  yellow: '#8f4d00',
+};
+
 export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const termRef = useRef<XTerm | null>(null);
   const theme = useStore((state) => state.theme);
+
+  // Обновление темы терминала без перезапуска процесса
+  useEffect(() => {
+    if (!termRef.current) return;
+    termRef.current.options.theme = theme === 'dark' ? darkTheme : lightTheme;
+  }, [theme]);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const isDark = theme === 'dark';
+    const currentTheme = useStore.getState().theme;
     const term = new XTerm({
       cursorBlink: true,
       fontSize: 13.5,
       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
-      theme: isDark
-        ? {
-            background: '#151616',
-            foreground: '#f4f5f0',
-            cursor: '#c8ff00',
-            selectionBackground: 'rgba(200, 255, 0, 0.35)',
-            black: '#080808',
-            brightBlack: '#242626',
-            green: '#7ed69a',
-            cyan: '#6fd3c3',
-            blue: '#8ea6ff',
-            yellow: '#ffb648',
-          }
-        : {
-            background: '#ffffff',
-            foreground: '#0b0d0c',
-            cursor: '#3f5a00',
-            selectionBackground: 'rgba(200, 255, 0, 0.45)',
-            black: '#e6e9e0',
-            brightBlack: '#d9ded0',
-            green: '#1f7a3d',
-            cyan: '#0f7c6d',
-            blue: '#2f4fd0',
-            yellow: '#8f4d00',
-          },
+      theme: currentTheme === 'dark' ? darkTheme : lightTheme,
     });
+    termRef.current = term;
 
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
@@ -57,10 +67,19 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
     let isDisposed = false;
     let unlistenData: (() => void) | null = null;
 
+    const project = useStore.getState().activeProject;
+    const job = useStore.getState().jobs.find((j) => j.worktree === worktree);
+    const resolvedCwd =
+      job?.worktree && job.worktree.startsWith('/')
+        ? job.worktree
+        : project?.path
+        ? `${project.path}/${worktree}`
+        : worktree;
+
     const promptStr = `\x1b[38;2;111;211;195m${worktree}\x1b[0m % `;
 
     if (isTauriEnv()) {
-      pty_open(`~/orchestra/orchestra/${worktree}`, term.cols, term.rows)
+      pty_open(resolvedCwd, term.cols, term.rows)
         .then(async (id) => {
           if (isDisposed) {
             pty_close(id);
@@ -100,7 +119,7 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
             if (cmd === 'clear') {
               term.clear();
             } else if (cmd === 'pwd') {
-              term.write(`~/orchestra/orchestra/${worktree}\r\n`);
+              term.write(`${resolvedCwd}\r\n`);
             } else if (cmd === 'ls') {
               term.write(`Cargo.toml  README.md  docs  src  src-tauri\r\n`);
             } else if (cmd.length > 0) {
@@ -135,6 +154,7 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
 
     return () => {
       isDisposed = true;
+      termRef.current = null;
       window.removeEventListener('resize', handleResize);
       if (unlistenData) unlistenData();
       if (ptyId && isTauriEnv()) {
@@ -142,7 +162,7 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
       }
       term.dispose();
     };
-  }, [worktree, theme]);
+  }, [worktree]);
 
   return <div ref={containerRef} className="term-body" />;
 };
