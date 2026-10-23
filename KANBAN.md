@@ -11,12 +11,15 @@
 - [ ] Мастер миграции для других пользователей (свой INSTRUCTIONS.md, свои проекты)
 
 ## In progress
-- [ ] Ключ подписи обновлений (только владелец): `pnpm tauri signer generate -w ~/.tauri/takt.key`, pubkey в
-  `src-tauri/tauri.conf.json`, секреты `TAURI_SIGNING_PRIVATE_KEY[_PASSWORD]` в GitHub — см. `docs/HANDOFF-updater.md`
 
 ## Review
 
 ## Done
+- [x] Ключ подписи обновлений: пара в `~/.tauri/takt.key`, pubkey в `tauri.conf.json`, приватный ключ в секрете
+  `TAURI_SIGNING_PRIVATE_KEY`; локальная сборка подписывается, первый релиз `v0.2.1` через `release.yml`
+  (см. `docs/HANDOFF-updater.md`, 23.10.2026)
+- [x] Логотипы нейронок на аватарках: `src/components/BrandLogos.tsx` (Claude, Codex, Antigravity) в чате,
+  спутниках, партитуре и лимитах сайдбара вместо букв/квадратов (23.10.2026)
 - [x] Экран «Модели» (SPEC §10): `src-tauri/src/models.rs` собирает списки из `claude --help`, кэша Codex, `agy models`
   и `ollama list`, выбор пишется в `~/.orchestra/models.json`, `job_run` передаёт `--model` в `agents.py`; фронт
   `src/screens/Models.tsx` + общая навигация `SetupNav`, популярные чипами, полный список по клику, i18n uk/en/ru,

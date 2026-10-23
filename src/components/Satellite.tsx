@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
+import { AgentLogo } from './BrandLogos';
 import { jobStateLabel } from '../lib/labels';
 import { useStore } from '../store';
 
@@ -54,7 +55,9 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
   return (
     <article className={satCls}>
       <div className="hd">
-        <div className="mono">{monoText}</div>
+        <div className="mono" title={agentName} aria-label={monoText}>
+          <AgentLogo agent={job.agent} size={16} />
+        </div>
         <div className="t">
           <b>{agentName}</b>
           <span>{t('sat.meta', { worktree: job.worktree, model: modelText })}</span>

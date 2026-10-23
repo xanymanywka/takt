@@ -1,6 +1,7 @@
 import React from 'react';
 import { useT } from '../i18n';
 import { useStore } from '../store';
+import { AgentLogo } from './BrandLogos';
 import { Support } from './Support';
 
 type Provider = 'claude' | 'codex' | 'antigravity';
@@ -68,7 +69,10 @@ export const Sidebar: React.FC = () => {
           const value = limitFor(key);
           return (
             <div className={className} key={key}>
-              <span>{label}</span>
+              <span className="lim-name">
+                <AgentLogo agent={key} size={12} />
+                {label}
+              </span>
               <b>{value === null ? '—' : `${value}%`}</b>
               <span className="t">
                 <i style={{ width: `${value ?? 0}%` }} />

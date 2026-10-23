@@ -2,6 +2,7 @@ import React from 'react';
 import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
 import { useStore } from '../store';
+import { AgentLogo, ClaudeLogo } from './BrandLogos';
 
 export const Score: React.FC = () => {
   const t = useT();
@@ -45,7 +46,9 @@ export const Score: React.FC = () => {
       {/* Строка дирижёра Claude */}
       <div className="stave me-row" style={{ '--c': 'var(--acc)' } as React.CSSProperties}>
         <div className="nm">
-          <i />
+          <span className="lg">
+            <ClaudeLogo size={13} />
+          </span>
           Claude
         </div>
         <div className="bars">
@@ -83,7 +86,9 @@ export const Score: React.FC = () => {
             style={{ '--c': colorVar } as React.CSSProperties}
           >
             <div className="nm">
-              <i />
+              <span className="lg">
+                <AgentLogo agent={job.agent} size={13} />
+              </span>
               {agentName}
             </div>
             <div className="bars">

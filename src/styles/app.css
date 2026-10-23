@@ -460,6 +460,25 @@ svg {
   background: var(--agy);
 }
 
+.lim .lim-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lim .lim-name svg {
+  color: var(--acc2);
+  flex: none;
+}
+
+.lim.codex .lim-name svg {
+  color: var(--codex);
+}
+
+.lim.agy .lim-name svg {
+  color: var(--agy);
+}
+
 /* ---------- main content column ---------- */
 .main {
   position: relative;
@@ -673,11 +692,14 @@ svg {
   color: var(--fg2);
 }
 
-.stave .nm i {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--c, var(--acc));
+.stave .nm .lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--c, var(--acc));
+  flex: none;
 }
 
 .bars {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ClaudeLogo } from '../components/BrandLogos';
 import { Composer } from '../components/Composer';
 import { Score } from '../components/Score';
 import { Satellite } from '../components/Satellite';
@@ -69,7 +70,9 @@ export const Chat: React.FC = () => {
               return (
                 <React.Fragment key={msg.id}>
                   <div className="voice">
-                    <div className="mono">{t('agent.claudeInitial')}</div>
+                    <div className="mono" title="Claude" aria-label={t('agent.claudeInitial')}>
+                      <ClaudeLogo size={16} />
+                    </div>
                     <div>
                       <div className="who">
                         <b>Claude</b> {t('chat.conducts')}
