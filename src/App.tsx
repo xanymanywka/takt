@@ -1,50 +1,54 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useEffect } from 'react';
+import { Lead } from './components/Lead';
+import { Sidebar } from './components/Sidebar';
+import { Chat } from './screens/Chat';
+import { Code } from './screens/Code';
+import { Orchestra } from './screens/Orchestra';
+import { Start } from './screens/Start';
+import { useStore } from './store';
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const screen = useStore((state) => state.screen);
+  const tab = useStore((state) => state.tab);
+  const init = useStore((state) => state.init);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    let cancelled = false;
+
+    init()
+      .then((cl) => {
+        if (cancelled) {
+          if (cl) cl();
+        } else {
+          cleanup = cl;
+        }
+      })
+      .catch((err) => {
+        console.error('Store init failed', err);
+      });
+
+    return () => {
+      cancelled = true;
+      if (cleanup) cleanup();
+    };
+  }, [init]);
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <div className="page">
+      <Lead />
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      {screen === 'start' ? (
+        <Start />
+      ) : (
+        <div className="win" id="chat">
+          <Sidebar />
+          {tab === 'chat' && <Chat />}
+          {tab === 'code' && <Code />}
+          {tab === 'orchestra' && <Orchestra />}
+        </div>
+      )}
+    </div>
   );
 }
 
