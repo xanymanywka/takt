@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Lead } from './components/Lead';
 import { Sidebar } from './components/Sidebar';
 import { UpdateBanner } from './components/UpdateBanner';
+import { About } from './screens/About';
 import { Chat } from './screens/Chat';
 import { Code } from './screens/Code';
 import { Orchestra } from './screens/Orchestra';
@@ -40,9 +41,9 @@ function App() {
       <Lead />
       <UpdateBanner />
 
-      {screen === 'start' ? (
-        <Start />
-      ) : (
+      {screen === 'start' && <Start />}
+      {screen === 'about' && <About />}
+      {screen === 'chat' && (
         <div className="win" id="chat">
           <Sidebar />
           {tab === 'chat' && <Chat />}

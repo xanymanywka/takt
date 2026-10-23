@@ -10,10 +10,15 @@ import {
   TerminalIcon,
   WranglerIcon,
 } from '../components/Icons';
+import { LOCALES, useLocale, useT, type Locale } from '../i18n';
 import { open_in_terminal, write_instructions } from '../lib/ipc';
 import { useStore } from '../store';
 
 export const Start: React.FC = () => {
+  const t = useT();
+  const locale = useLocale();
+  const setLocale = useStore((state) => state.setLocale);
+  const setScreen = useStore((state) => state.setScreen);
   const setup = useStore((state) => state.setup);
   const updateChecksEnabled = useStore((state) => state.updateChecksEnabled);
   const updateCheckStatus = useStore((state) => state.updateCheckStatus);
@@ -74,64 +79,70 @@ export const Start: React.FC = () => {
         </div>
 
         <div className="proj">
-          <h3>Настройка</h3>
+          <h3>{t('start.nav.title')}</h3>
           <ul className="setnav">
             <li>
               <span className="k">
                 <CheckIcon />
               </span>
-              Главный агент
+              {t('start.nav.conductor')}
             </li>
             <li>
               <span className="k">
                 <CheckIcon />
               </span>
-              Исполнители
+              {t('start.nav.workers')}
             </li>
             <li>
               <span className="k">
                 <CheckIcon />
               </span>
-              Импорт чатов
+              {t('start.nav.import')}
             </li>
             <li>
               <span className="k">
                 <CheckIcon />
               </span>
-              Аккаунты GitHub
+              {t('start.nav.github')}
             </li>
             <li aria-current="true">
               <span className="k now">
                 <DotIcon />
               </span>
-              Доступы
+              {t('start.nav.access')}
             </li>
             <li className="off">
               <span className="k todo">
                 <CircleTodoIcon />
               </span>
-              Инструкции
+              {t('start.nav.instructions')}
             </li>
             <li className="off">
               <span className="k todo">
                 <CircleTodoIcon />
               </span>
-              Локальные модели
+              {t('start.nav.models')}
             </li>
             <li className="off">
               <span className="k todo">
                 <CircleTodoIcon />
               </span>
-              Навыки
+              {t('start.nav.skills')}
+            </li>
+            <li className="about-nav" onClick={() => setScreen('about')}>
+              <span className="k">
+                <ArrowRightIcon />
+              </span>
+              {t('start.nav.about')}
             </li>
           </ul>
         </div>
 
         <div className="limits">
-          <h3>Шаг 5 из 8</h3>
+          <h3>{t('start.step', { step: 5, total: 8 })}</h3>
           <div className="lim">
-            <span>Настройка</span>
-            <b>~6 мин</b>
+            <span>{t('start.setup')}</span>
+            <b>{t('start.eta', { minutes: 6 })}</b>
             <span className="t">
               <i style={{ width: '56%' }} />
             </span>
@@ -141,16 +152,14 @@ export const Start: React.FC = () => {
 
       <main className="main">
         <section className="start">
-          <h2>Доступы</h2>
+          <h2>{t('start.access.title')}</h2>
           <p className="sub">
-            Один раз показать агентам, куда и как ходить,{' '}
-            <i>чтобы потом никто не спрашивал пароль посреди задачи.</i> Секреты остаются в Связке
-            ключей, агенты получают только имена.
+            {t('start.access.sub1')} <i>{t('start.access.sub2')}</i> {t('start.access.sub3')}
           </p>
 
           <div className="grp">
             <h3>
-              Серверы по SSH <span>{sshHosts.length} хостов из ~/.ssh/config</span>
+              {t('start.ssh.title')} <span>{t('start.ssh.count', { count: sshHosts.length })}</span>
             </h3>
             <div className="rows">
               {sshHosts.map((host) => {
@@ -170,12 +179,12 @@ export const Start: React.FC = () => {
                       {host.host}
                       <span>
                         {host.hostname || host.host}
-                        {host.user ? ` · пользователь ${host.user}` : ''}
+                        {host.user ? ` · ${t('start.ssh.user', { user: host.user })}` : ''}
                       </span>
                     </div>
                     <div className="who">
                       <i className={agents.claude ? undefined : 'off'} title="Claude">
-                        К
+                        {t('agent.claudeInitial')}
                       </i>
                       <i className={agents.codex ? undefined : 'off'} title="Codex">
                         Cx
@@ -185,38 +194,38 @@ export const Start: React.FC = () => {
                       </i>
                     </div>
                     <div className={`ok ${host.warn ? 'warn' : ''}`}>
-                      {host.status || 'подключается'}
+                      {host.status || t('start.ssh.connecting')}
                     </div>
 
                     {isOpen && (
                       <div className="detail">
                         {host.identityFile && (
                           <div>
-                            <small>Ключ</small>
+                            <small>{t('start.ssh.key')}</small>
                             {host.identityFile}
                           </div>
                         )}
                         {host.checked && (
                           <div>
-                            <small>Проверено</small>
+                            <small>{t('start.ssh.checked')}</small>
                             {host.checked}
                           </div>
                         )}
                         {host.usedBy && (
                           <div>
-                            <small>Используют</small>
+                            <small>{t('start.ssh.usedBy')}</small>
                             {host.usedBy}
                           </div>
                         )}
                         {host.port && (
                           <div>
-                            <small>Порт</small>
+                            <small>{t('start.ssh.port')}</small>
                             {host.port}
                           </div>
                         )}
                         {host.rule && (
                           <div className="rule">
-                            <b>Правило:</b> {host.rule}
+                            <b>{t('start.ssh.rule')}:</b> {host.rule}
                           </div>
                         )}
                       </div>
@@ -229,13 +238,13 @@ export const Start: React.FC = () => {
 
           <div className="grp">
             <h3>
-              Инструменты в терминале <span>нужен вход в каждый</span>
+              {t('start.tools.title')} <span>{t('start.tools.sub')}</span>
             </h3>
             <div className="rows">
               {tools.map((tool) => {
                 const agents = tool.agents || { claude: true, codex: true, agy: true };
                 const isWarn = tool.warn || !tool.loggedIn;
-                const statusText = tool.statusText || (tool.loggedIn ? 'вошли' : 'не выполнен вход');
+                const statusText = tool.statusText || (tool.loggedIn ? t('start.tools.loggedIn') : t('start.tools.loggedOut'));
 
                 return (
                   <div key={tool.id} className="row">
@@ -246,7 +255,7 @@ export const Start: React.FC = () => {
                     </div>
                     <div className="who">
                       <i className={agents.claude ? undefined : 'off'} title="Claude">
-                        К
+                        {t('agent.claudeInitial')}
                       </i>
                       <i className={agents.codex ? undefined : 'off'} title="Codex">
                         Cx
@@ -264,7 +273,7 @@ export const Start: React.FC = () => {
 
           <div className="grp update-settings">
             <h3>
-              Обновления <span>стабильный канал</span>
+              {t('start.updates.title')} <span>{t('start.updates.channel')}</span>
             </h3>
             <div className="update-settings__row">
               <label className="update-settings__toggle">
@@ -276,7 +285,7 @@ export const Start: React.FC = () => {
                 <span className="update-settings__track" aria-hidden="true">
                   <span />
                 </span>
-                <span>Проверять обновления при запуске</span>
+                <span>{t('start.updates.onLaunch')}</span>
               </label>
               <button
                 type="button"
@@ -284,7 +293,7 @@ export const Start: React.FC = () => {
                 disabled={updateCheckStatus === 'checking'}
                 onClick={() => void checkUpdate(true)}
               >
-                {updateCheckStatus === 'checking' ? 'Проверяем…' : 'Проверить сейчас'}
+                {updateCheckStatus === 'checking' ? t('start.updates.checking') : t('start.updates.checkNow')}
               </button>
             </div>
             {updateCheckMessage ? (
@@ -300,10 +309,31 @@ export const Start: React.FC = () => {
             ) : null}
           </div>
 
+          <div className="grp language-settings">
+            <h3>
+              {t('start.language.title')} <span>{t('start.language.sub')}</span>
+            </h3>
+            <div className="lang-row" role="radiogroup" aria-label={t('start.language.title')}>
+              {LOCALES.map((code: Locale) => (
+                <button
+                  key={code}
+                  type="button"
+                  role="radio"
+                  aria-checked={locale === code}
+                  className={`lang-btn ${locale === code ? 'is-active' : ''}`}
+                  onClick={() => setLocale(code)}
+                >
+                  {t(`locale.${code}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="foot">
             <div className="n">
-              Серверы MCP ({mcpNames}{mcpExtra > 0 ? ` и ещё ${mcpExtra}` : ''}) уже подхвачены из
-              конфигов Claude, Codex и agy. Поправить можно позже в настройках.
+              {t('start.foot.mcp', {
+                names: mcpExtra > 0 ? `${mcpNames} ${t('start.foot.more', { count: mcpExtra })}` : mcpNames,
+              })}
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
@@ -317,14 +347,14 @@ export const Start: React.FC = () => {
                 onClick={handleOpenTerminal}
               >
                 <TerminalIcon size={16} />
-                <span>Открыть терминал</span>
+                <span>{t('start.foot.openTerminal')}</span>
               </button>
               <button
                 type="button"
                 className="cta"
                 onClick={handleCreateInstructions}
               >
-                {instructionsCreated ? 'Создано!' : 'Дальше: инструкции'}
+                {instructionsCreated ? t('start.foot.created') : t('start.foot.next')}
                 <span>
                   <ArrowRightIcon />
                 </span>

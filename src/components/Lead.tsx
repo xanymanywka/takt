@@ -1,8 +1,11 @@
 import React from 'react';
+import { useT } from '../i18n';
 import { useStore } from '../store';
+import { LocaleToggle } from './LocaleToggle';
 import { ThemeToggle } from './ThemeToggle';
 
 export const Lead: React.FC = () => {
+  const t = useT();
   const screen = useStore((state) => state.screen);
   const setScreen = useStore((state) => state.setScreen);
   const activeProject = useStore((state) => state.activeProject);
@@ -11,27 +14,30 @@ export const Lead: React.FC = () => {
     <header className="lead">
       <div>
         <h1>
-          Takt. <em>Партитура</em>, а не дашборд.
+          {t('lead.title.before')}
+          <em>{t('lead.title.em')}</em>
+          {t('lead.title.after')}
         </h1>
         {activeProject && <p>{activeProject.name}</p>}
       </div>
       <div className="ctl">
-        <div className="switch" role="tablist" aria-label="Экраны">
+        <div className="switch" role="tablist" aria-label={t('lead.screens')}>
           <button
             role="tab"
             aria-pressed={screen === 'chat'}
             onClick={() => setScreen('chat')}
           >
-            Чат с дирижёром
+            {t('lead.chat')}
           </button>
           <button
             role="tab"
             aria-pressed={screen === 'start'}
             onClick={() => setScreen('start')}
           >
-            Старт · Доступы
+            {t('lead.start')}
           </button>
         </div>
+        <LocaleToggle />
         <ThemeToggle />
       </div>
     </header>

@@ -1,10 +1,13 @@
 import React from 'react';
-import { useStore } from '../store';
+import { Tabs } from '../components/Tabs';
+import { INTL_TAGS, useLocale, useT } from '../i18n';
 import type { JobState } from '../lib/ipc';
 import { capitalize, jobStateLabel } from '../lib/labels';
+import { useStore } from '../store';
 
 export const Orchestra: React.FC = () => {
-  const tab = useStore((state) => state.tab);
+  const t = useT();
+  const locale = useLocale();
   const setTab = useStore((state) => state.setTab);
   const activeProject = useStore((state) => state.activeProject);
   const jobs = useStore((state) => state.jobs);
@@ -29,7 +32,10 @@ export const Orchestra: React.FC = () => {
     return { repo, dir };
   };
 
-  const startedFmt = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
+  const startedFmt = new Intl.DateTimeFormat(INTL_TAGS[locale], {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
   const formatStarted = (iso: string) => {
     const d = new Date(iso);
     return Number.isNaN(d.getTime()) ? iso : startedFmt.format(d);
@@ -40,49 +46,27 @@ export const Orchestra: React.FC = () => {
   return (
     <main className="main">
       <div className="top">
-        <div className="seg" role="tablist" aria-label="Вкладки">
-          <button
-            role="tab"
-            aria-pressed={tab === 'chat'}
-            onClick={() => setTab('chat')}
-          >
-            Чат
-          </button>
-          <button
-            role="tab"
-            aria-pressed={tab === 'code'}
-            onClick={() => setTab('code')}
-          >
-            Код
-          </button>
-          <button
-            role="tab"
-            aria-pressed={tab === 'orchestra'}
-            onClick={() => setTab('orchestra')}
-          >
-            Оркестр
-          </button>
-        </div>
+        <Tabs />
         <div className="where">
-          <b>{projectName}</b> · реестр задач
+          <b>{projectName}</b> · {t('orch.registry')}
         </div>
       </div>
 
       <div className="orch-view">
         <div className="orch-header">
-          <h2>Реестр задач</h2>
-          <p>Все активные и завершённые задачи исполнителей</p>
+          <h2>{t('orch.title')}</h2>
+          <p>{t('orch.sub')}</p>
         </div>
 
         <table className="orch-table">
           <thead>
             <tr>
-              <th>Проект / Задача</th>
-              <th>Исполнитель</th>
-              <th>Состояние</th>
-              <th>Шаги</th>
-              <th>Начато</th>
-              <th style={{ textAlign: 'right' }}>Действия</th>
+              <th>{t('orch.col.task')}</th>
+              <th>{t('orch.col.agent')}</th>
+              <th>{t('orch.col.state')}</th>
+              <th>{t('orch.col.steps')}</th>
+              <th>{t('orch.col.started')}</th>
+              <th style={{ textAlign: 'right' }}>{t('orch.col.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -133,7 +117,11 @@ export const Orchestra: React.FC = () => {
                       {getStateLabel(job.state)}
                     </span>
                   </td>
-                  <td>{steps.length ? `${doneCount} из ${steps.length}` : '—'}</td>
+                  <td>
+                    {steps.length
+                      ? t('orch.stepsOf', { done: doneCount, total: steps.length })
+                      : '—'}
+                  </td>
                   <td>{formatStarted(job.startedAt)}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'inline-flex', gap: '8px' }}>
@@ -143,7 +131,7 @@ export const Orchestra: React.FC = () => {
                           className="orch-btn ans"
                           onClick={() => setTab('chat')}
                         >
-                          Ответить
+                          {t('orch.answer')}
                         </button>
                       )}
                       {canKill(job.state) && (
@@ -152,7 +140,7 @@ export const Orchestra: React.FC = () => {
                           className="orch-btn kill"
                           onClick={() => killJob(job.name)}
                         >
-                          Остановить
+                          {t('orch.stop')}
                         </button>
                       )}
                     </div>

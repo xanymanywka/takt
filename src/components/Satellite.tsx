@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
-import { useStore } from '../store';
 import { jobStateLabel } from '../lib/labels';
+import { useStore } from '../store';
 
 interface SatelliteProps {
   job: Job;
 }
 
 export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
+  const t = useT();
   const setTab = useStore((state) => state.setTab);
   const setActiveWorktree = useStore((state) => state.setActiveWorktree);
   const sendJobAnswer = useStore((state) => state.sendJobAnswer);
@@ -23,15 +25,15 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
 
   const isAsking = job.state === 'asking' || Boolean(job.question);
   const stateCls = isAsking ? 'state wait' : 'state';
-  const stateText = isAsking ? 'ждёт вас' : jobStateLabel(job.state);
+  const stateText = isAsking ? t('sat.waiting') : jobStateLabel(job.state);
 
   const steps = job.steps || [];
   const firstIncompleteIdx = steps.findIndex((s) => !s.done);
-  const nextStep = firstIncompleteIdx >= 0 ? steps[firstIncompleteIdx].text : 'завершение';
+  const nextStep = firstIncompleteIdx >= 0 ? steps[firstIncompleteIdx].text : t('sat.finish');
 
-  const logLines = job.logLines || [
-    { time: '14:02', text: job.lastLine || 'Выполняется задача' },
-  ];
+  const logLines = job.logLines || [{ time: '14:02', text: job.lastLine || t('sat.running') }];
+
+  const laterKeyword = t('sat.laterKeyword').toLowerCase();
 
   const handleChipClick = (chip: string) => {
     sendJobAnswer(job.name, chip);
@@ -55,7 +57,7 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
         <div className="mono">{monoText}</div>
         <div className="t">
           <b>{agentName}</b>
-          <span>ворктри {job.worktree} · модель {modelText}</span>
+          <span>{t('sat.meta', { worktree: job.worktree, model: modelText })}</span>
         </div>
         <span className={stateCls}>
           <i />
@@ -77,7 +79,7 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
           <p>{job.question || job.lastLine}</p>
           <div className="chips">
             {(job.chips || []).map((chip, idx) => {
-              const isQ = chip.toLowerCase().includes('позже');
+              const isQ = chip.toLowerCase().includes(laterKeyword);
               return (
                 <button
                   key={idx}
@@ -93,12 +95,12 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
             <input
               type="text"
               className="sat-ask-input"
-              placeholder="Свой ответ..."
+              placeholder={t('sat.customPlaceholder')}
               value={customAnswer}
               onChange={(e) => setCustomAnswer(e.target.value)}
             />
             <button type="submit" className="sat-ask-send">
-              Ответить
+              {t('sat.answer')}
             </button>
           </form>
         </div>
@@ -108,20 +110,20 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
         <div className="step">
           {isAsking ? (
             <>
-              Пауза на шаге {firstIncompleteIdx >= 0 ? firstIncompleteIdx + 1 : 2} ·{' '}
+              {t('sat.pause', { step: firstIncompleteIdx >= 0 ? firstIncompleteIdx + 1 : 2 })} ·{' '}
               <b>{nextStep}</b>
             </>
           ) : (
             <>
-              Дальше: <b>{nextStep}</b>
+              {t('sat.next')} <b>{nextStep}</b>
             </>
           )}
         </div>
         <button type="button" onClick={() => console.log('diff clicked')}>
-          Дифф
+          {t('sat.diff')}
         </button>
         <button type="button" onClick={handleOpenTerminal}>
-          Терминал
+          {t('sat.terminal')}
         </button>
       </div>
     </article>

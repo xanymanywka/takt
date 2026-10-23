@@ -1,6 +1,8 @@
+import { useT } from '../i18n';
 import { useStore } from '../store';
 
 export function UpdateBanner() {
+  const t = useT();
   const update = useStore((state) => state.update);
   const updateProgress = useStore((state) => state.updateProgress);
   const updateError = useStore((state) => state.updateError);
@@ -12,12 +14,12 @@ export function UpdateBanner() {
   const isInstalling = updateProgress !== null;
 
   return (
-    <section className="update-banner" aria-label="Доступно обновление">
+    <section className="update-banner" aria-label={t('update.aria')}>
       <div className="update-banner__content">
-        <strong>Доступна версия {update.version}</strong>
+        <strong>{t('update.available', { version: update.version })}</strong>
         {isInstalling ? (
           <span className="update-banner__progress" role="status" aria-live="polite">
-            Скачивание {Math.round(updateProgress)}%
+            {t('update.downloading', { percent: Math.round(updateProgress) })}
           </span>
         ) : null}
         <div className="update-banner__actions">
@@ -27,7 +29,7 @@ export function UpdateBanner() {
             disabled={isInstalling}
             onClick={installUpdate}
           >
-            Обновить
+            {t('update.install')}
           </button>
           <button
             type="button"
@@ -35,7 +37,7 @@ export function UpdateBanner() {
             disabled={isInstalling}
             onClick={dismissUpdate}
           >
-            Позже
+            {t('update.later')}
           </button>
         </div>
       </div>

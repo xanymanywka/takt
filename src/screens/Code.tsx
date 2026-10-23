@@ -1,10 +1,11 @@
 import React from 'react';
+import { Tabs } from '../components/Tabs';
 import { Terminal } from '../components/Terminal';
+import { useT } from '../i18n';
 import { useStore } from '../store';
 
 export const Code: React.FC = () => {
-  const tab = useStore((state) => state.tab);
-  const setTab = useStore((state) => state.setTab);
+  const t = useT();
   const activeProject = useStore((state) => state.activeProject);
   const activeWorktree = useStore((state) => state.activeWorktree);
   const setActiveWorktree = useStore((state) => state.setActiveWorktree);
@@ -13,47 +14,20 @@ export const Code: React.FC = () => {
   const projectName = activeProject?.name || 'Takt';
 
   // Собираем список ворктри
-  const worktrees = Array.from(
-    new Set([
-      ...jobs.map((j) => j.worktree),
-      'main',
-    ])
-  );
+  const worktrees = Array.from(new Set([...jobs.map((j) => j.worktree), 'main']));
 
   return (
     <main className="main">
       <div className="top">
-        <div className="seg" role="tablist" aria-label="Вкладки">
-          <button
-            role="tab"
-            aria-pressed={tab === 'chat'}
-            onClick={() => setTab('chat')}
-          >
-            Чат
-          </button>
-          <button
-            role="tab"
-            aria-pressed={tab === 'code'}
-            onClick={() => setTab('code')}
-          >
-            Код
-          </button>
-          <button
-            role="tab"
-            aria-pressed={tab === 'orchestra'}
-            onClick={() => setTab('orchestra')}
-          >
-            Оркестр
-          </button>
-        </div>
+        <Tabs />
         <div className="where">
-          <b>{projectName}</b> · ворктри <b>{activeWorktree}</b>
+          <b>{projectName}</b> · {t('code.worktree')} <b>{activeWorktree}</b>
         </div>
       </div>
 
       <div className="code-view">
         <aside className="wt-list">
-          <h4>Ворктри</h4>
+          <h4>{t('code.worktrees')}</h4>
           {worktrees.map((wt) => {
             const matchingJob = jobs.find((j) => j.worktree === wt);
             const isCurrent = wt === activeWorktree;
@@ -81,9 +55,9 @@ export const Code: React.FC = () => {
         <section className="term-container">
           <div className="term-header">
             <span>
-              Терминал: <b>{activeWorktree}</b>
+              {t('code.terminal')}: <b>{activeWorktree}</b>
             </span>
-            <span>PTY-сессия</span>
+            <span>{t('code.pty')}</span>
           </div>
           <Terminal worktree={activeWorktree} />
         </section>

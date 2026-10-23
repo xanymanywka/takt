@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useT } from '../i18n';
 import { useStore } from '../store';
 import { PlusIcon, SendIcon } from './Icons';
 
 export const Composer: React.FC = () => {
+  const t = useT();
   const [text, setText] = useState('');
   const sendUserMessage = useStore((state) => state.sendUserMessage);
   const error = useStore((state) => state.error);
@@ -29,8 +31,8 @@ export const Composer: React.FC = () => {
         <button
           type="button"
           className="plus"
-          aria-label="Прикрепить"
-          title="Прикрепить"
+          aria-label={t('composer.attach')}
+          title={t('composer.attach')}
         >
           <PlusIcon size={16} />
         </button>
@@ -39,7 +41,7 @@ export const Composer: React.FC = () => {
           <input
             type="text"
             className="in"
-            placeholder="Ответить дирижёру"
+            placeholder={t('composer.placeholder')}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -51,8 +53,8 @@ export const Composer: React.FC = () => {
         <button
           type="button"
           className="send"
-          aria-label="Отправить"
-          title="Отправить"
+          aria-label={t('composer.send')}
+          title={t('composer.send')}
           onClick={handleSend}
         >
           <SendIcon size={16} />

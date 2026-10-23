@@ -1,6 +1,7 @@
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check, type Update } from '@tauri-apps/plugin-updater';
 import { isTauriEnv } from './ipc';
+import { t } from '../i18n';
 
 export interface UpdateInfo {
   version: string;
@@ -35,7 +36,7 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
 
 export async function installUpdate(onProgress: (progress: number) => void): Promise<void> {
   if (!pendingUpdate) {
-    throw new Error('Обновление не найдено. Проверьте наличие новой версии ещё раз.');
+    throw new Error(t('update.notFound'));
   }
 
   let downloaded = 0;

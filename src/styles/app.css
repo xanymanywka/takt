@@ -1692,3 +1692,198 @@ svg {
     transition-duration: 0s !important;
   }
 }
+
+/* ===== Язык (переключатель в шапке) ===== */
+.theme.locale {
+  font-family: var(--ui, inherit);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--fg2);
+}
+
+.theme.locale:hover {
+  color: var(--fg);
+}
+
+/* ===== Язык (группа в Старте) ===== */
+.lang-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.lang-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--fg2);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  transition: color .16s var(--ease), background .16s var(--ease), transform .16s var(--ease);
+}
+
+.lang-btn:hover {
+  color: var(--fg);
+}
+
+.lang-btn:active {
+  transform: scale(.97);
+}
+
+.lang-btn.is-active {
+  background: var(--acc);
+  color: #080808;
+}
+
+/* ===== Сайдбар: низ (поддержать · о программе) ===== */
+.side-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.side-about {
+  text-align: left;
+  padding: 7px 8px;
+  border-radius: var(--r2);
+  color: var(--muted);
+  font-size: 13px;
+  transition: color .16s var(--ease), background .16s var(--ease);
+}
+
+.side-about:hover,
+.side-about[aria-current="page"] {
+  color: var(--fg);
+  background: rgba(var(--ink), .05);
+}
+
+.support-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--r2);
+  color: var(--fg2);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  transition: color .16s var(--ease), background .16s var(--ease);
+}
+
+.support-strip:hover {
+  color: var(--fg);
+  background: rgba(var(--ink), .05);
+}
+
+.support-strip__heart {
+  color: var(--acc);
+  font-style: normal;
+}
+
+.setnav li.about-nav {
+  cursor: pointer;
+  margin-top: 8px;
+  color: var(--fg2);
+}
+
+.setnav li.about-nav:hover {
+  color: var(--fg);
+}
+
+/* ===== О программе ===== */
+.about-card {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: var(--r2);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.about-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--acc);
+  color: #080808;
+  font-family: var(--voice);
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.about-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.about-id b {
+  color: var(--fg);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.about-text {
+  margin: 18px 0 0;
+  max-width: 62ch;
+  color: var(--fg2);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.row.about-link {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.about-arrow {
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+
+.row.about-link:hover .about-arrow {
+  color: var(--fg);
+}
+
+/* ===== Поддержать ===== */
+.row.support-row {
+  cursor: pointer;
+}
+
+.support-value {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 13px;
+  color: var(--fg2);
+  word-break: break-all;
+}
+
+.support-qr {
+  width: 72px;
+  height: 72px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  grid-row: 1 / -1;
+}
+
+.support-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}

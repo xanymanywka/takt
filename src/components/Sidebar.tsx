@@ -1,24 +1,31 @@
 import React from 'react';
+import { useT } from '../i18n';
 import { useStore } from '../store';
+import { Support } from './Support';
+
+type Provider = 'claude' | 'codex' | 'antigravity';
+
+const PROVIDERS: Array<{ key: Provider; label: string; className: string }> = [
+  { key: 'claude', label: 'Claude', className: 'lim' },
+  { key: 'codex', label: 'Codex', className: 'lim codex' },
+  { key: 'antigravity', label: 'Antigravity', className: 'lim agy' },
+];
 
 export const Sidebar: React.FC = () => {
+  const t = useT();
   const projects = useStore((state) => state.projects);
   const activeProject = useStore((state) => state.activeProject);
   const setActiveProject = useStore((state) => state.setActiveProject);
   const jobs = useStore((state) => state.jobs);
   const limits = useStore((state) => state.limits);
+  const screen = useStore((state) => state.screen);
+  const setScreen = useStore((state) => state.setScreen);
 
-  // Проверяем, есть ли запущенные задачи
   const hasRunningJobs = jobs.some((j) => j.state === 'running' || j.state === 'asking');
 
-  const getLimitVal = (provider: 'claude' | 'codex' | 'antigravity'): number => {
-    const lim = limits.find((l) => l.provider === provider);
-    return lim?.sessionLeft ?? (provider === 'claude' ? 62 : provider === 'codex' ? 41 : 88);
-  };
-
-  const claudeVal = getLimitVal('claude');
-  const codexVal = getLimitVal('codex');
-  const agyVal = getLimitVal('antigravity');
+  // Нет данных о лимите — показываем «—», а не выдуманный процент.
+  const limitFor = (provider: Provider): number | null =>
+    limits.find((l) => l.provider === provider)?.sessionLeft ?? null;
 
   return (
     <aside className="side">
@@ -29,7 +36,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <div className="proj">
-        <h3>Проекты</h3>
+        <h3>{t('side.projects')}</h3>
         <ul>
           {projects.map((proj) => {
             const isCurrent = activeProject?.name === proj.name;
@@ -45,7 +52,7 @@ export const Sidebar: React.FC = () => {
                   style={{ background: proj.color || '#9b86d6' }}
                 />
                 <span className="n">{proj.name}</span>
-                {isLive && <span className="live" title="идёт задача" />}
+                {isLive && <span className="live" title={t('side.live')} />}
               </li>
             );
           })}
@@ -53,28 +60,31 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <div className="limits">
-        <h3>Осталось на сегодня</h3>
-        <div className="lim">
-          <span>Claude</span>
-          <b>{claudeVal}%</b>
-          <span className="t">
-            <i style={{ width: `${claudeVal}%` }} />
-          </span>
-        </div>
-        <div className="lim codex">
-          <span>Codex</span>
-          <b>{codexVal}%</b>
-          <span className="t">
-            <i style={{ width: `${codexVal}%` }} />
-          </span>
-        </div>
-        <div className="lim agy">
-          <span>Antigravity</span>
-          <b>{agyVal}%</b>
-          <span className="t">
-            <i style={{ width: `${agyVal}%` }} />
-          </span>
-        </div>
+        <h3>{t('side.limits')}</h3>
+        {PROVIDERS.map(({ key, label, className }) => {
+          const value = limitFor(key);
+          return (
+            <div className={className} key={key}>
+              <span>{label}</span>
+              <b>{value === null ? '—' : `${value}%`}</b>
+              <span className="t">
+                <i style={{ width: `${value ?? 0}%` }} />
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="side-foot">
+        <Support compact onOpen={() => setScreen('about')} />
+        <button
+          type="button"
+          className="side-about"
+          aria-current={screen === 'about' ? 'page' : undefined}
+          onClick={() => setScreen('about')}
+        >
+          {t('side.about')}
+        </button>
       </div>
     </aside>
   );

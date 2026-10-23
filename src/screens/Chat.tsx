@@ -2,19 +2,18 @@ import React from 'react';
 import { Composer } from '../components/Composer';
 import { Score } from '../components/Score';
 import { Satellite } from '../components/Satellite';
+import { Tabs } from '../components/Tabs';
+import { useT } from '../i18n';
 import { useStore } from '../store';
-import { pluralRu } from '../lib/labels';
 
 export const Chat: React.FC = () => {
-  const tab = useStore((state) => state.tab);
-  const setTab = useStore((state) => state.setTab);
+  const t = useT();
   const activeProject = useStore((state) => state.activeProject);
   const messages = useStore((state) => state.messages);
   const jobs = useStore((state) => state.jobs);
 
   const projectName = activeProject?.name || 'Takt';
   const workerCount = jobs.length;
-  const workerWord = pluralRu(workerCount, 'исполнитель', 'исполнителя', 'исполнителей');
 
   // Если в проекте нет сообщений и нет задач
   const isEmpty = messages.length === 0 && jobs.length === 0;
@@ -31,43 +30,18 @@ export const Chat: React.FC = () => {
   return (
     <main className="main">
       <div className="top">
-        <div className="seg" role="tablist" aria-label="Вкладки">
-          <button
-            role="tab"
-            aria-pressed={tab === 'chat'}
-            onClick={() => setTab('chat')}
-          >
-            Чат
-          </button>
-          <button
-            role="tab"
-            aria-pressed={tab === 'code'}
-            onClick={() => setTab('code')}
-          >
-            Код
-          </button>
-          <button
-            role="tab"
-            aria-pressed={tab === 'orchestra'}
-            onClick={() => setTab('orchestra')}
-          >
-            Оркестр
-          </button>
-        </div>
+        <Tabs />
         <div className="where">
-          <b>{projectName}</b> · ветка design-v3{' '}
-          <span className="pill">{workerCount} {workerWord}</span>
+          <b>{projectName}</b> · {t('chat.branch', { branch: 'design-v3' })}{' '}
+          <span className="pill">{t('chat.workers', { count: workerCount })}</span>
         </div>
       </div>
 
       <section className="chat">
         {isEmpty ? (
           <div className="empty-state">
-            <h3>Дирижёр ждёт первой задачи</h3>
-            <p>
-              Опишите, что нужно сделать. Дирижёр создаст план, распределит задачи между исполнителями
-              и покажет партитуру.
-            </p>
+            <h3>{t('chat.empty.title')}</h3>
+            <p>{t('chat.empty.text')}</p>
           </div>
         ) : (
           <>
@@ -95,10 +69,10 @@ export const Chat: React.FC = () => {
               return (
                 <React.Fragment key={msg.id}>
                   <div className="voice">
-                    <div className="mono">К</div>
+                    <div className="mono">{t('agent.claudeInitial')}</div>
                     <div>
                       <div className="who">
-                        <b>Claude</b> дирижирует
+                        <b>Claude</b> {t('chat.conducts')}
                       </div>
                       <p>{msg.text}</p>
                       {isLastAssistant && <Score />}

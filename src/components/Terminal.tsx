@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 import { isTauriEnv, listen, pty_close, pty_open, pty_resize, pty_write } from '../lib/ipc';
 import { useStore } from '../store';
+import { t } from '../i18n';
 
 interface TerminalProps {
   worktree: string;
@@ -98,7 +99,7 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
           }
         })
         .catch((err) => {
-          term.write(`\r\nОшибка открытия PTY: ${String(err)}\r\n`);
+          term.write(`\r\n${t('term.ptyError')}: ${String(err)}\r\n`);
         });
 
       term.onData((data) => {
@@ -109,7 +110,7 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
     } else {
       // Мок-терминал с эхо
       term.write(
-        `\x1b[38;2;179;230;0m[такт]\x1b[0m подключение к ворктри \x1b[1m${worktree}\x1b[0m (эхо-терминал)\r\n`
+        `\x1b[38;2;179;230;0m[takt]\x1b[0m ${t('term.mockBefore')} \x1b[1m${worktree}\x1b[0m ${t('term.mockAfter')}\r\n`
       );
       term.write(promptStr);
 

@@ -20,8 +20,9 @@ import {
   installUpdate as runUpdateInstall,
   type UpdateInfo,
 } from './lib/updater';
+import { getLocale, setLocale as applyLocale, t, type Locale } from './i18n';
 
-export type ScreenType = 'chat' | 'start';
+export type ScreenType = 'chat' | 'start' | 'about';
 export type TabType = 'chat' | 'code' | 'orchestra';
 export type ThemeType = 'light' | 'dark';
 export type UpdateCheckStatus = 'idle' | 'checking' | 'current' | 'available' | 'error';
@@ -43,6 +44,7 @@ interface OrchestraState {
   screen: ScreenType;
   tab: TabType;
   theme: ThemeType;
+  locale: Locale;
   projects: Project[];
   activeProject: Project | null;
   activeWorktree: string;
@@ -62,6 +64,7 @@ interface OrchestraState {
   setTab: (tab: TabType) => void;
   setTheme: (theme: ThemeType) => void;
   toggleTheme: () => void;
+  setLocale: (locale: Locale) => void;
   setActiveProject: (project: Project) => void;
   setActiveWorktree: (worktree: string) => void;
   sendUserMessage: (text: string) => Promise<void>;
@@ -99,31 +102,25 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-const INITIAL_MESSAGES: ChatMessage[] = [
-  {
-    id: 'init_user_1',
-    role: 'user',
-    text: 'Добавь мост к терминалам: Codex и agy должны идти через PTY, а не через голый stdout, иначе теряем цвет и ввод.',
-    time: 'только что',
-  },
-  {
-    id: 'init_assistant_1',
-    role: 'assistant',
-    who: 'Claude',
-    text: 'Понял. Это две независимые части, поэтому разведу их по разным ворктри: Codex делает PTY-мост на Rust-стороне, Antigravity рисует панель терминала в интерфейсе. Себе оставляю план, ревью и мёрж.',
-  },
-];
+/** Демо-диалог вне Tauri; текст берётся из словаря текущего языка. */
+function initialMessages(): ChatMessage[] {
+  return [
+    { id: 'init_user_1', role: 'user', text: t('demo.user'), time: t('chat.justNow') },
+    { id: 'init_assistant_1', role: 'assistant', who: 'Claude', text: t('demo.assistant') },
+  ];
+}
 
 export const useStore = create<OrchestraState>((set, get) => ({
   screen: 'chat',
   tab: 'chat',
   theme: getInitialTheme(),
+  locale: getLocale(),
   projects: [],
   activeProject: null,
   activeWorktree: 'pty-bridge',
   jobs: [],
   limits: [],
-  messages: isTauriEnv() ? [] : INITIAL_MESSAGES,
+  messages: isTauriEnv() ? [] : initialMessages(),
   setup: null,
   error: null,
   update: null,
@@ -153,6 +150,15 @@ export const useStore = create<OrchestraState>((set, get) => ({
     get().setTheme(next);
   },
 
+  setLocale: (locale: Locale) => {
+    applyLocale(locale);
+    set((state) => {
+      // Демо-сообщения перевести вслед за языком, живые — не трогать.
+      const isDemo = state.messages.some((m) => m.id === 'init_user_1');
+      return { locale, messages: isDemo && !isTauriEnv() ? initialMessages() : state.messages };
+    });
+  },
+
   setActiveProject: (activeProject: Project) => set({ activeProject }),
 
   sendUserMessage: async (text: string) => {
@@ -163,7 +169,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
       id: `usr_${Date.now()}`,
       role: 'user',
       text: trimmed,
-      time: 'только что',
+      time: t('chat.justNow'),
     };
 
     set((state) => ({
@@ -204,7 +210,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
     if (existingUpdate) {
       set({
         updateCheckStatus: 'available',
-        updateCheckMessage: manual ? `Доступна версия ${existingUpdate.version}` : null,
+        updateCheckMessage: manual ? t('update.available', { version: existingUpdate.version }) : null,
       });
       return;
     }
@@ -220,7 +226,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
           update,
           updateError: null,
           updateCheckStatus: 'available',
-          updateCheckMessage: manual ? `Доступна версия ${update.version}` : null,
+          updateCheckMessage: manual ? t('update.available', { version: update.version }) : null,
         });
         return;
       }
@@ -235,14 +241,14 @@ export const useStore = create<OrchestraState>((set, get) => ({
       set({
         update: null,
         updateCheckStatus: 'current',
-        updateCheckMessage: manual ? 'Установлена актуальная версия' : null,
+        updateCheckMessage: manual ? t('update.current') : null,
       });
     } catch (err: unknown) {
       const message = errorMessage(err);
-      console.info(`Обновления: ${message}`);
+      console.info(`${t('update.logPrefix')}: ${message}`);
       set({
         updateCheckStatus: 'error',
-        updateCheckMessage: manual ? `Не удалось проверить обновления: ${message}` : null,
+        updateCheckMessage: manual ? t('update.checkFailed', { message }) : null,
       });
     }
   },
@@ -256,7 +262,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
     } catch (err: unknown) {
       set({
         updateProgress: null,
-        updateError: `Не удалось установить обновление: ${errorMessage(err)}`,
+        updateError: t('update.installFailed', { message: errorMessage(err) }),
       });
     }
   },
@@ -265,7 +271,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
     dismissedUpdateVersion = get().update?.version ?? null;
     set({ update: null, updateProgress: null, updateError: null });
     void discardUpdate().catch((err: unknown) => {
-      console.info(`Обновления: ${errorMessage(err)}`);
+      console.info(`${t('update.logPrefix')}: ${errorMessage(err)}`);
     });
   },
 
@@ -381,11 +387,11 @@ export const useStore = create<OrchestraState>((set, get) => ({
 
           for (const block of payload.message.content) {
             if (block.type === 'tool_use') {
-              let label = `вызывает ${block.name}`;
+              let label = t('tool.calls', { name: block.name });
               if (block.name === 'read_file' && block.input?.path) {
-                label = `читает ${String(block.input.path)}`;
+                label = t('tool.reads', { path: String(block.input.path) });
               } else if (block.name === 'run_command' && block.input?.CommandLine) {
-                label = `запускает ${String(block.input.CommandLine)}`;
+                label = t('tool.runs', { command: String(block.input.CommandLine) });
               }
               set((state) => ({
                 messages: [

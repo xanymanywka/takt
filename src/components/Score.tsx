@@ -1,8 +1,10 @@
 import React from 'react';
-import { useStore } from '../store';
+import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
+import { useStore } from '../store';
 
 export const Score: React.FC = () => {
+  const t = useT();
   const jobs = useStore((state) => state.jobs);
 
   const totalSteps = 5;
@@ -34,10 +36,10 @@ export const Score: React.FC = () => {
   };
 
   return (
-    <div className="score" aria-label="Партитура задачи">
+    <div className="score" aria-label={t('score.aria')}>
       <header>
-        <h4>Партитура</h4>
-        <span>5 шагов · начали 4 минуты назад</span>
+        <h4>{t('score.title')}</h4>
+        <span>{t('score.meta', { steps: totalSteps, minutes: 4 })}</span>
       </header>
 
       {/* Строка дирижёра Claude */}
@@ -54,7 +56,7 @@ export const Score: React.FC = () => {
           <i />
         </div>
         <div className="st">
-          <b>план готов</b>, жду исполнителей
+          <b>{t('score.planReady')}</b>, {t('score.waitingWorkers')}
         </div>
       </div>
 
@@ -66,20 +68,13 @@ export const Score: React.FC = () => {
         const doneCount = steps.filter((s) => s.done).length;
         const currentIdx = steps.findIndex((s) => !s.done);
         const stepNum = currentIdx >= 0 ? currentIdx + 1 : doneCount;
+        const stepOf = t('score.stepOf', { step: stepNum, total: steps.length || totalSteps });
 
-        let statusText: React.ReactNode = (
+        const statusText: React.ReactNode = (
           <>
-            шаг {stepNum} из {steps.length || totalSteps} · <b>{job.lastLine}</b>
+            {stepOf} · <b>{job.state === 'asking' ? t('score.awaitingAnswer') : job.lastLine}</b>
           </>
         );
-
-        if (job.state === 'asking') {
-          statusText = (
-            <>
-              шаг {stepNum} из {steps.length || totalSteps} · <b>ждёт ответа</b>
-            </>
-          );
-        }
 
         return (
           <div
@@ -114,19 +109,19 @@ export const Score: React.FC = () => {
       <div className="legend">
         <span>
           <i />
-          сделано
+          {t('score.legend.done')}
         </span>
         <span className="l2">
           <i />
-          в работе
+          {t('score.legend.now')}
         </span>
         <span className="l3">
           <i />
-          вопрос к вам
+          {t('score.legend.ask')}
         </span>
         <span className="l4">
           <i />
-          впереди
+          {t('score.legend.ahead')}
         </span>
       </div>
     </div>
