@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "orchestra",
+  "productName": "Takt",
   "version": "0.1.0",
-  "identifier": "com.xanymanywka.orchestra",
+  "identifier": "space.xanyman.takt",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "orchestra",
-        "width": 800,
-        "height": 600
+        "title": "Takt",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 980,
+        "minHeight": 640
       }
     ],
     "security": {
