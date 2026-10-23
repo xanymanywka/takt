@@ -18,13 +18,17 @@
 - [ ] Замечания CodeRabbit по UI (minor, после мёржа 23.10.2026): клавиатурный доступ к строкам проектов/ворктри/SSH
   (кнопки вместо div), «—» вместо выдуманных процентов лимитов, шрифты Montserrat/Newsreader в бандл
   (`@fontsource`), переключатель вкладок без `role="tab"` + `aria-pressed`
-- [ ] Автообновление `tauri-plugin-updater` + плашка «Доступна версия X» по `docs/TASK-updater.md` (Codex, ворктри `updater`)
+- [ ] Ключ подписи обновлений (только владелец): `pnpm tauri signer generate -w ~/.tauri/takt.key`, pubkey в
+  `src-tauri/tauri.conf.json`, секреты `TAURI_SIGNING_PRIVATE_KEY[_PASSWORD]` в GitHub — см. `docs/HANDOFF-updater.md`
 - [ ] Дымовой тест 23.10.2026, остаток: проверить, что `job_kill` реально убивает tmux-окно; `conductor_send` и `pty_open`
   вживую ещё не прогнаны
 
 ## Review
 
 ## Done
+- [x] Автообновление `tauri-plugin-updater` + плашка «Доступна версия X», настройки «Обновления», проверка раз в 24 ч
+  по `docs/TASK-updater.md` (Codex, доделано после лимита; CodeRabbit: major только про пустой pubkey — шаг владельца;
+  мёрж `updater` в main `8f8c133`, 23.10.2026)
 - [x] «Реестр задач»: проект и папка берутся из `worktree`, дата старта в локальном формате, «Остановить» только у
   активных задач (`0007bca`, 23.10.2026)
 - [x] Ядро Tauri: jobs, limits, conductor, pty, setup по `docs/TASK-core.md` (Codex); `cargo check` зелёный, gate major
