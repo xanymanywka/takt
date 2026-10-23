@@ -17,6 +17,7 @@ use setup::{open_in_terminal, setup_status, write_instructions};
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
         .manage(ConductorState::default())
         .manage(PtyState::default())
         .invoke_handler(tauri::generate_handler![
@@ -42,6 +43,9 @@ pub fn run() {
             open_in_terminal,
         ])
         .setup(|app| {
+            #[cfg(desktop)]
+            app.handle()
+                .plugin(tauri_plugin_updater::Builder::new().build())?;
             jobs::start_watcher(app.handle().clone());
             limits::start_poller(app.handle().clone());
             Ok(())

@@ -14,10 +14,22 @@ import {
   type Project,
   type Setup,
 } from './lib/ipc';
+import {
+  checkForUpdate,
+  discardUpdate,
+  installUpdate as runUpdateInstall,
+  type UpdateInfo,
+} from './lib/updater';
 
 export type ScreenType = 'chat' | 'start';
 export type TabType = 'chat' | 'code' | 'orchestra';
 export type ThemeType = 'light' | 'dark';
+export type UpdateCheckStatus = 'idle' | 'checking' | 'current' | 'available' | 'error';
+
+const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
+const UPDATE_CHECKS_STORAGE_KEY = 'takt-update-checks';
+
+let dismissedUpdateVersion: string | null = null;
 
 export interface ChatMessage {
   id: string;
@@ -39,6 +51,12 @@ interface OrchestraState {
   messages: ChatMessage[];
   setup: Setup | null;
   error: string | null;
+  update: UpdateInfo | null;
+  updateChecksEnabled: boolean;
+  updateProgress: number | null;
+  updateError: string | null;
+  updateCheckStatus: UpdateCheckStatus;
+  updateCheckMessage: string | null;
 
   setScreen: (screen: ScreenType) => void;
   setTab: (tab: TabType) => void;
@@ -49,6 +67,10 @@ interface OrchestraState {
   sendUserMessage: (text: string) => Promise<void>;
   sendJobAnswer: (jobName: string, answer: string) => Promise<void>;
   killJob: (jobName: string) => Promise<void>;
+  checkUpdate: (manual?: boolean) => Promise<void>;
+  installUpdate: () => Promise<void>;
+  dismissUpdate: () => void;
+  setUpdateChecks: (enabled: boolean) => void;
   init: () => Promise<() => void>;
 }
 
@@ -62,6 +84,19 @@ function getInitialTheme(): ThemeType {
     return 'dark';
   }
   return 'light';
+}
+
+function getInitialUpdateChecks(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return localStorage.getItem(UPDATE_CHECKS_STORAGE_KEY) !== 'false';
+  } catch {
+    return true;
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 const INITIAL_MESSAGES: ChatMessage[] = [
@@ -91,6 +126,12 @@ export const useStore = create<OrchestraState>((set, get) => ({
   messages: isTauriEnv() ? [] : INITIAL_MESSAGES,
   setup: null,
   error: null,
+  update: null,
+  updateChecksEnabled: getInitialUpdateChecks(),
+  updateProgress: null,
+  updateError: null,
+  updateCheckStatus: 'idle',
+  updateCheckMessage: null,
 
   setScreen: (screen: ScreenType) => set({ screen }),
   setTab: (tab: TabType) => set({ tab }),
@@ -156,12 +197,101 @@ export const useStore = create<OrchestraState>((set, get) => ({
     }
   },
 
+  checkUpdate: async (manual = false) => {
+    if (get().updateCheckStatus === 'checking') return;
+
+    const existingUpdate = get().update;
+    if (existingUpdate) {
+      set({
+        updateCheckStatus: 'available',
+        updateCheckMessage: manual ? `Доступна версия ${existingUpdate.version}` : null,
+      });
+      return;
+    }
+
+    // Ручная проверка снимает отложенную версию: пользователь явно хочет её увидеть.
+    if (manual) dismissedUpdateVersion = null;
+
+    set({ updateCheckStatus: 'checking', updateCheckMessage: null });
+    try {
+      const update = await checkForUpdate();
+      if (update && update.version !== dismissedUpdateVersion) {
+        set({
+          update,
+          updateError: null,
+          updateCheckStatus: 'available',
+          updateCheckMessage: manual ? `Доступна версия ${update.version}` : null,
+        });
+        return;
+      }
+
+      if (update) {
+        // Автопроверка: версия отложена кнопкой «Позже», до перезапуска не показываем.
+        await discardUpdate();
+        set({ update: null, updateCheckStatus: 'available', updateCheckMessage: null });
+        return;
+      }
+
+      set({
+        update: null,
+        updateCheckStatus: 'current',
+        updateCheckMessage: manual ? 'Установлена актуальная версия' : null,
+      });
+    } catch (err: unknown) {
+      const message = errorMessage(err);
+      console.info(`Обновления: ${message}`);
+      set({
+        updateCheckStatus: 'error',
+        updateCheckMessage: manual ? `Не удалось проверить обновления: ${message}` : null,
+      });
+    }
+  },
+
+  installUpdate: async () => {
+    if (!get().update) return;
+
+    set({ updateProgress: 0, updateError: null });
+    try {
+      await runUpdateInstall((updateProgress) => set({ updateProgress }));
+    } catch (err: unknown) {
+      set({
+        updateProgress: null,
+        updateError: `Не удалось установить обновление: ${errorMessage(err)}`,
+      });
+    }
+  },
+
+  dismissUpdate: () => {
+    dismissedUpdateVersion = get().update?.version ?? null;
+    set({ update: null, updateProgress: null, updateError: null });
+    void discardUpdate().catch((err: unknown) => {
+      console.info(`Обновления: ${errorMessage(err)}`);
+    });
+  },
+
+  setUpdateChecks: (updateChecksEnabled: boolean) => {
+    try {
+      localStorage.setItem(UPDATE_CHECKS_STORAGE_KEY, String(updateChecksEnabled));
+    } catch {}
+    set({ updateChecksEnabled, updateCheckMessage: null });
+  },
+
   init: async () => {
     // 1. Применяем тему
     const th = get().theme;
     if (typeof document !== 'undefined') {
       document.documentElement.dataset.theme = th;
     }
+
+    if (get().updateChecksEnabled) {
+      void get().checkUpdate();
+    }
+
+    const updateTimer = setInterval(() => {
+      if (get().updateChecksEnabled) {
+        void get().checkUpdate();
+      }
+    }, UPDATE_CHECK_INTERVAL);
 
     // 2. Загружаем данные
     try {
@@ -275,6 +405,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
     unlisteners.push(unlistenConductor);
 
     return () => {
+      clearInterval(updateTimer);
       unlisteners.forEach((u) => u());
     };
   },

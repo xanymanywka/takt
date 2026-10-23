@@ -15,6 +15,11 @@ import { useStore } from '../store';
 
 export const Start: React.FC = () => {
   const setup = useStore((state) => state.setup);
+  const updateChecksEnabled = useStore((state) => state.updateChecksEnabled);
+  const updateCheckStatus = useStore((state) => state.updateCheckStatus);
+  const updateCheckMessage = useStore((state) => state.updateCheckMessage);
+  const checkUpdate = useStore((state) => state.checkUpdate);
+  const setUpdateChecks = useStore((state) => state.setUpdateChecks);
 
   const [openSshRows, setOpenSshRows] = useState<Record<string, boolean>>({
     'nova-welcome-1': true,
@@ -255,6 +260,44 @@ export const Start: React.FC = () => {
                 );
               })}
             </div>
+          </div>
+
+          <div className="grp update-settings">
+            <h3>
+              Обновления <span>стабильный канал</span>
+            </h3>
+            <div className="update-settings__row">
+              <label className="update-settings__toggle">
+                <input
+                  type="checkbox"
+                  checked={updateChecksEnabled}
+                  onChange={(event) => setUpdateChecks(event.target.checked)}
+                />
+                <span className="update-settings__track" aria-hidden="true">
+                  <span />
+                </span>
+                <span>Проверять обновления при запуске</span>
+              </label>
+              <button
+                type="button"
+                className="update-settings__check"
+                disabled={updateCheckStatus === 'checking'}
+                onClick={() => void checkUpdate(true)}
+              >
+                {updateCheckStatus === 'checking' ? 'Проверяем…' : 'Проверить сейчас'}
+              </button>
+            </div>
+            {updateCheckMessage ? (
+              <p
+                className={`update-settings__status ${
+                  updateCheckStatus === 'error' ? 'is-error' : ''
+                }`}
+                role="status"
+                aria-live="polite"
+              >
+                {updateCheckMessage}
+              </p>
+            ) : null}
           </div>
 
           <div className="foot">
