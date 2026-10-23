@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   conductor_send,
+  isTauriEnv,
   job_kill,
   job_send,
   limits as apiLimits,
@@ -87,7 +88,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
   activeWorktree: 'pty-bridge',
   jobs: [],
   limits: [],
-  messages: INITIAL_MESSAGES,
+  messages: isTauriEnv() ? [] : INITIAL_MESSAGES,
   setup: null,
   error: null,
 

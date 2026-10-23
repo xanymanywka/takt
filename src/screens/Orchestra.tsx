@@ -1,5 +1,7 @@
 import React from 'react';
 import { useStore } from '../store';
+import type { JobState } from '../lib/ipc';
+import { capitalize, jobStateLabel } from '../lib/labels';
 
 export const Orchestra: React.FC = () => {
   const tab = useStore((state) => state.tab);
@@ -17,22 +19,7 @@ export const Orchestra: React.FC = () => {
     return agent;
   };
 
-  const getStateLabel = (state: string) => {
-    switch (state) {
-      case 'running':
-        return 'Выполняется';
-      case 'asking':
-        return 'Ожидает ответа';
-      case 'done':
-        return 'Завершено';
-      case 'limit':
-        return 'Лимит';
-      case 'killed':
-        return 'Остановлено';
-      default:
-        return state;
-    }
-  };
+  const getStateLabel = (state: JobState) => capitalize(jobStateLabel(state));
 
   return (
     <main className="main">

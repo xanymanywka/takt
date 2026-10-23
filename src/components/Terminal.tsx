@@ -86,11 +86,16 @@ export const Terminal: React.FC<TerminalProps> = ({ worktree }) => {
             return;
           }
           ptyId = id;
-          unlistenData = await listen<{ id: string; data: string }>('pty://data', (e) => {
+          const unlisten = await listen<{ id: string; data: string }>('pty://data', (e) => {
             if (e.payload.id === ptyId) {
               term.write(e.payload.data);
             }
           });
+          if (isDisposed) {
+            unlisten();
+          } else {
+            unlistenData = unlisten;
+          }
         })
         .catch((err) => {
           term.write(`\r\nОшибка открытия PTY: ${String(err)}\r\n`);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Job } from '../lib/ipc';
 import { useStore } from '../store';
+import { jobStateLabel } from '../lib/labels';
 
 interface SatelliteProps {
   job: Job;
@@ -18,11 +19,11 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
   const satCls = isCodex ? 'sat codex' : isAgy ? 'sat agy' : 'sat claude';
   const monoText = isCodex ? 'Cx' : isAgy ? 'Ag' : 'Cl';
   const agentName = isCodex ? 'Codex' : isAgy ? 'Antigravity' : 'Claude';
-  const modelText = job.model || (isCodex ? 'gpt-5-codex' : 'Gemini 2.5 Pro');
+  const modelText = job.model || (isCodex ? 'gpt-5-codex' : isAgy ? 'Gemini 2.5 Pro' : 'Claude');
 
   const isAsking = job.state === 'asking' || Boolean(job.question);
   const stateCls = isAsking ? 'state wait' : 'state';
-  const stateText = isAsking ? 'ждёт вас' : job.state === 'done' ? 'готово' : 'пишет';
+  const stateText = isAsking ? 'ждёт вас' : jobStateLabel(job.state);
 
   const steps = job.steps || [];
   const firstIncompleteIdx = steps.findIndex((s) => !s.done);

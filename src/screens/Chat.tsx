@@ -3,6 +3,7 @@ import { Composer } from '../components/Composer';
 import { Score } from '../components/Score';
 import { Satellite } from '../components/Satellite';
 import { useStore } from '../store';
+import { pluralRu } from '../lib/labels';
 
 export const Chat: React.FC = () => {
   const tab = useStore((state) => state.tab);
@@ -12,7 +13,8 @@ export const Chat: React.FC = () => {
   const jobs = useStore((state) => state.jobs);
 
   const projectName = activeProject?.name || 'Takt';
-  const workerCount = jobs.length || 2;
+  const workerCount = jobs.length;
+  const workerWord = pluralRu(workerCount, 'исполнитель', 'исполнителя', 'исполнителей');
 
   // Если в проекте нет сообщений и нет задач
   const isEmpty = messages.length === 0 && jobs.length === 0;
@@ -54,7 +56,7 @@ export const Chat: React.FC = () => {
         </div>
         <div className="where">
           <b>{projectName}</b> · ветка design-v3{' '}
-          <span className="pill">{workerCount} исполнителя</span>
+          <span className="pill">{workerCount} {workerWord}</span>
         </div>
       </div>
 
