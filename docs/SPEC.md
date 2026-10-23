@@ -1,0 +1,188 @@
+# Оркестр — архитектура v0.1
+
+Десктоп-приложение для дирижирования агентами: пользователь говорит с главным агентом
+(Claude Code) как в чате, а под сообщением видит «спутники» — карточки исполнителей
+(Codex, Antigravity/agy, Claude), которых дирижёр запустил, с честным прогрессом по шагам.
+
+Заменяет Emdash / Nimbalyst / Conductor / Vibe Kanban (все отклонены 23.10.2026).
+Дизайн утверждён: `docs/design/orchestra-hand.html` (открыть в браузере), токены — `docs/DESIGN.md`.
+
+## 1. Стек
+
+- **Tauri 2** (Rust 2024) + **React 19** + **TypeScript** + **Vite**. Менеджер — pnpm.
+- CSS: обычные CSS-файлы с токенами из DESIGN.md. Без Tailwind, без UI-китов.
+- Состояние: `zustand`. Терминал: `@xterm/xterm` + `@xterm/addon-fit`.
+- Rust: `tokio`, `serde`, `portable-pty` (PTY для вкладки «Код»), `notify` (слежение за файлами).
+- Никаких прокси и подмены провайдеров: `claude` ходит напрямую в Anthropic.
+  Приложение **не выставляет** `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_SMALL_FAST_MODEL`.
+
+## 2. Что уже есть и переиспользуется
+
+Рабочая оркестрация живёт в `~/.orchestra/agents.py` (tmux). v0.1 **не переписывает** её,
+а строит интерфейс поверх:
+
+| Что | Где | Как используем |
+|---|---|---|
+| Реестр задач | `~/.orchestra/jobs.json` (`{name:{agent,worktree,task,startedAt,state,handedTo?,takeoverOf?}}`) | читаем и следим (`notify`) |
+| Экран исполнителя | `agents tail <name> [N]` | опрашиваем раз в 2 с для открытых карточек |
+| Ввод исполнителю | `agents send <name> <text>` | кнопка «Ответить» в карточке |
+| Запуск | `agents new <repo> <name>`, `agents run <codex\|gemini\|claude> <wt> <task-file>` | команды из интерфейса и из дирижёра |
+| Остановка | `agents kill <name>` | |
+| Лимиты | `codexbar usage --provider claude\|codex\|antigravity` | парсим текст (проверить `--format json`/`--json` — если есть, использовать) |
+| Ворктри | `~/orchestra/<repo>/<name>` | путь из jobs.json |
+
+`agents` вызывается как `python3 ~/.orchestra/agents.py …` через login-shell `zsh -lc`,
+PATH начинается с `~/.local/bin:/opt/homebrew/bin`.
+
+## 3. Дирижёр
+
+Главный агент — процесс `claude` в режиме потокового JSON:
+
+```
+claude --dangerously-skip-permissions -p --verbose \
+  --output-format stream-json --input-format stream-json \
+  [--resume <session_id>]
+```
+
+- cwd = выбранный проект. Процесс живёт, пока открыт чат проекта; новые реплики пишутся
+  в stdin строкой `{"type":"user","message":{"role":"user","content":"…"}}`.
+- Каждая строка stdout — JSON-событие; Rust пробрасывает его как есть во фронт
+  (`conductor://event`) и дополнительно хранит `session_id` в `~/.orchestra/sessions.json`
+  (`{ "<projectPath>": "<session_id>" }`) для `--resume`.
+- Фронт рендерит: `assistant` → текст (шрифт голоса, Newsreader), `tool_use` → одна тихая
+  строка «читает файл…/запускает…», `result` → конец хода.
+- Дирижёр узнаёт правила из `~/.orchestra/INSTRUCTIONS.md` (см. §5): приложение передаёт его
+  через `--append-system-prompt-file ~/.orchestra/INSTRUCTIONS.md`.
+
+## 4. Честный прогресс («партитура»)
+
+Шаг = пункт чек-листа в `docs/TASK-<slug>.md` исполнителя, раздел `## Приёмка`
+(`- [ ]` / `- [x]`). Rust читает файл задачи из jobs.json, считает `done/total`,
+отдаёт список шагов. Состояния карточки:
+
+| state | откуда |
+|---|---|
+| `running` | jobs.json |
+| `asking` | последняя строка экрана оканчивается на `?` или содержит `(y/n)`, `Allow`, `Разрешить` |
+| `limit` | jobs.json `state=limit` или regex лимита из agents.py |
+| `done` | jobs.json `state=done` или `exited`, все шаги `[x]` |
+| `killed`/`failed` | jobs.json |
+
+Никаких процентов «на глаз»: только `k из n` и текущая строка экрана.
+
+## 5. Первый запуск и инструкции
+
+При первом старте приложение:
+
+1. Проверяет инструменты: `claude`, `codex`, `agy`, `gh`, `codexbar`, `coderabbit`, `tmux`, `git`
+   (`zsh -lc 'command -v …'`) и вход: `claude auth status` (или `claude --version` + файл
+   `~/.claude/.credentials.json`), `codex login status`, `gh auth status`, `agy --version`.
+2. Создаёт `~/.orchestra/INSTRUCTIONS.md` из шаблона `src-tauri/templates/INSTRUCTIONS.md`
+   (правила дирижёра: кому что отдавать, команды `agents`, шаблон TASK, коммиты только от
+   владельца, CodeRabbit-гейт). **Не читает и не правит `~/.claude/CLAUDE.md`** — это личный
+   файл пользователя.
+3. Создаёт `~/.orchestra/projects.json` (`[{name, path, group, color}]`), если его нет,
+   предлагая папки из `~/projects/*` с `.git`.
+4. Логины приложение **не выполняет**: показывает список и кнопку «Открыть терминал», где
+   пользователь сам вводит `claude` / `codex login` / `gh auth login` / `agy`.
+
+## 6. Экраны (см. дизайн)
+
+- **Шапка:** заголовок, переключатель «Чат с дирижёром · Старт · Доступы», кнопка темы.
+- **Боковая панель:** проекты (цвет группы, точка активности), внизу «Осталось на сегодня» —
+  три полоски лимитов.
+- **Чат:** сегменты «Чат · Код · Оркестр»; реплики пользователя (пузырь), реплики дирижёра
+  (голосом), под репликой — **партитура** (строка на исполнителя, такты = шаги) и
+  **спутники** (карточки: имя, ворктри·модель, состояние, 3 последних строки, «Дальше:», вопрос
+  с полем ответа, футер «шаг k из n · Дифф · Терминал»). Внизу стеклянный композер.
+- **Код:** xterm в выбранной ворктри (PTY `zsh -l`), слева список ворктри.
+- **Оркестр:** все задачи всех проектов таблицей (jobs.json) с состояниями.
+- **Старт · Доступы:** инструменты (найден/вход), SSH-хосты из `~/.ssh/config` (только чтение),
+  MCP из `~/.codex/config.toml` и `~/.gemini/config/mcp_config.json` (только чтение), CTA
+  «Создать INSTRUCTIONS.md» / «Открыть терминал для входа».
+
+## 7. IPC-контракт (единственный источник правды)
+
+Rust реализует команды и события ровно с этими именами и формами; фронт пишет
+`src/lib/ipc.ts` по этому контракту и **мок** `src/lib/mock.ts`, который работает в обычном
+браузере (`pnpm dev`, когда `window.__TAURI_INTERNALS__` отсутствует).
+
+```ts
+// ---- типы ----
+export type AgentKind = 'codex' | 'gemini' | 'claude';
+export type JobState = 'running' | 'asking' | 'limit' | 'done' | 'killed' | 'failed' | 'exited';
+
+export interface Project { name: string; path: string; group?: string; color?: string }
+export interface Step { text: string; done: boolean }
+export interface Job {
+  name: string; agent: AgentKind; worktree: string; task: string; // task — путь к TASK-файлу
+  startedAt: string; state: JobState; handedTo?: string; takeoverOf?: string;
+  steps: Step[]; lastLine: string; model?: string;
+}
+export interface Limit { provider: 'claude' | 'codex' | 'antigravity'; sessionLeft?: number; weeklyLeft?: number; resetsIn?: string; raw: string }
+export interface Tool { id: 'claude'|'codex'|'agy'|'gh'|'codexbar'|'coderabbit'|'tmux'|'git'; found: boolean; path?: string; version?: string; loggedIn?: boolean; account?: string }
+export interface SshHost { host: string; hostname?: string; user?: string; port?: number; identityFile?: string }
+export interface McpServer { name: string; source: 'codex' | 'agy'; command?: string; url?: string }
+export interface Setup { instructionsExists: boolean; projectsExists: boolean; tools: Tool[]; ssh: SshHost[]; mcp: McpServer[] }
+
+// ---- команды (tauri invoke) ----
+list_projects(): Project[]
+save_projects(projects: Project[]): void
+list_jobs(): Job[]                                  // jobs.json + шаги + последняя строка
+job_screen(name: string, lines?: number): string    // agents tail
+job_send(name: string, text: string): void          // agents send
+job_kill(name: string): void
+job_new(repo: string, name: string): string         // agents new → путь ворктри
+job_run(agent: AgentKind, worktree: string, taskFile: string, name?: string): Job
+write_task(worktree: string, slug: string, markdown: string): string // docs/TASK-<slug>.md → путь
+limits(): Limit[]
+setup_status(): Setup
+write_instructions(): string                        // создаёт ~/.orchestra/INSTRUCTIONS.md, возвращает путь
+conductor_start(projectPath: string): { sessionId?: string }
+conductor_send(projectPath: string, text: string): void
+conductor_stop(projectPath: string): void
+pty_open(cwd: string, cols: number, rows: number): string  // id
+pty_write(id: string, data: string): void
+pty_resize(id: string, cols: number, rows: number): void
+pty_close(id: string): void
+open_in_terminal(cwd: string, command?: string): void // Terminal.app через osascript
+
+// ---- события (tauri listen) ----
+'jobs://changed'           payload: Job[]           // при изменении jobs.json или экрана
+'limits://changed'         payload: Limit[]         // раз в 60 с
+'conductor://event'        payload: { projectPath: string; event: unknown } // строка stream-json
+'conductor://exit'         payload: { projectPath: string; code: number }
+'pty://data'               payload: { id: string; data: string }
+'pty://exit'               payload: { id: string; code: number }
+```
+
+Ошибки команд — строкой на русском (`Err(String)`), фронт показывает их в карточке/тосте.
+
+## 8. Структура репозитория
+
+```
+src/                    фронт (agy)
+  main.tsx, App.tsx
+  styles/tokens.css     токены из DESIGN.md (день на :root, ночь в [data-theme=dark] и media)
+  styles/app.css
+  lib/ipc.ts            обёртки invoke/listen по §7
+  lib/mock.ts           мок-данные и фейковые события для браузера
+  store.ts              zustand
+  screens/Chat.tsx  Code.tsx  Orchestra.tsx  Start.tsx
+  components/Lead.tsx Sidebar.tsx Score.tsx Satellite.tsx Composer.tsx Terminal.tsx ThemeToggle.tsx Icons.tsx
+src-tauri/              ядро (Codex)
+  src/lib.rs            регистрация команд
+  src/jobs.rs  limits.rs  conductor.rs  pty.rs  setup.rs  projects.rs  shell.rs (zsh -lc helper)
+  templates/INSTRUCTIONS.md
+  capabilities/default.json   разрешения shell/fs/event
+docs/                   SPEC.md, DESIGN.md, TASK-*.md, design/orchestra-hand.html
+KANBAN.md
+```
+
+## 9. Качество
+
+- `pnpm build` (tsc + vite) и `cargo check` в `src-tauri` зелёные.
+- Фронт проверяется в браузере на моках (`pnpm dev`), ядро — `pnpm tauri dev` с реальным
+  `~/.orchestra/jobs.json`.
+- Перед «готово»: `coderabbit review --agent --gate major --dir <ворктри>`.
+- Коммиты только от xanymanywka, без Co-Authored-By и упоминаний ИИ.
