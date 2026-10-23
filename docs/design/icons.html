@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Такт — варианты иконки, серия 2 (ИИ)</title>
+<title>Такт — варианты иконки, серия 3 (буква Т)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -27,8 +27,8 @@
 </head>
 <body>
 <button class="tg" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'dark':'light'">Тема</button>
-<h1>Такт — иконка, серия 2: ИИ + дирижёр</h1>
-<p>Каждый знак читается как ИИ (узлы, искра, чип, сигнал) и одновременно как такт/дирижирование. Сквиркл macOS, графит #080808 + лайм #C8FF00. Размеры 128 / 64 / 32 и вид в доке.</p>
+<h1>Такт — иконка, серия 3: буква Т из узлов</h1>
+<p>Развитие вариантов 1 и 6 из серии 2: нейросеть из узлов, собранная в букву Т. Лайм отмечает ядро-дирижёра. Сквиркл macOS, графит #080808 + лайм #C8FF00. Размеры 128 / 64 / 32 и вид в доке.</p>
 
 <svg width="0" height="0" style="position:absolute">
   <defs>
@@ -36,66 +36,50 @@
       <path d="M.5 0C.11 0 0 .11 0 .5S.11 1 .5 1 1 .89 1 .5 .89 0 .5 0z"/>
     </clipPath>
 
-    <!-- 1. Дирижёр и агенты: лаймовый узел-ядро, три белых узла-исполнителя на связях -->
+    <!-- 1. Т из узлов: перекладина с двумя белыми узлами, лаймовое ядро в точке стыка, ножка к узлу-исполнителю -->
     <symbol id="i1" viewBox="0 0 100 100">
       <rect width="100" height="100" fill="#080808"/>
-      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round">
-        <path d="M50 56 30 30M50 56 70 30M50 56v22"/>
-      </g>
-      <circle cx="30" cy="30" r="7" fill="#F4F4F0"/>
-      <circle cx="70" cy="30" r="7" fill="#F4F4F0"/>
-      <circle cx="50" cy="78" r="7" fill="#F4F4F0"/>
-      <circle cx="50" cy="56" r="11" fill="#C8FF00"/>
+      <g stroke="#F4F4F0" stroke-width="4.5" stroke-linecap="round"><path d="M24 30h52M50 30v46"/></g>
+      <circle cx="24" cy="30" r="7" fill="#F4F4F0"/><circle cx="76" cy="30" r="7" fill="#F4F4F0"/><circle cx="50" cy="76" r="7" fill="#F4F4F0"/>
+      <circle cx="50" cy="30" r="11" fill="#C8FF00"/>
     </symbol>
-
-    <!-- 2. Искра-палочка: четырёхлучевая искра ИИ, нижний луч вытянут в дирижёрскую палочку -->
+    <!-- 2. Т-дерево: лаймовое ядро внизу ножки, от перекладины вниз три узла-исполнителя -->
     <symbol id="i2" viewBox="0 0 100 100">
       <rect width="100" height="100" fill="#080808"/>
-      <path d="M62 20c2 14 6 18 20 20-14 2-18 6-20 20-2-14-6-18-20-20 14-2 18-6 20-20z" fill="#C8FF00"/>
-      <path d="M58 44 26 76" stroke="#F4F4F0" stroke-width="6" stroke-linecap="round"/>
+      <g stroke="#F4F4F0" stroke-width="4.5" stroke-linecap="round"><path d="M22 28h56M50 28v44M22 28v14M78 28v14"/></g>
+      <circle cx="22" cy="44" r="6" fill="#F4F4F0"/><circle cx="78" cy="44" r="6" fill="#F4F4F0"/>
+      <circle cx="50" cy="74" r="10" fill="#C8FF00"/>
     </symbol>
-
-    <!-- 3. Чип в такт: контур процессора, по нему идёт линия пульса с лаймовым ударом -->
+    <!-- 3. Жирная Т + ветка: монолитная белая буква, от стыка вправо-вверх лаймовая связь к узлу -->
     <symbol id="i3" viewBox="0 0 100 100">
       <rect width="100" height="100" fill="#080808"/>
-      <rect x="26" y="26" width="48" height="48" rx="8" fill="none" stroke="#F4F4F0" stroke-width="4"/>
-      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round">
-        <path d="M38 26V18M50 26V18M62 26V18M38 74v8M50 74v8M62 74v8M26 38h-8M26 50h-8M26 62h-8M74 38h8M74 50h8M74 62h8"/>
-      </g>
-      <path d="M34 50h10l5-12 6 24 5-12h6" fill="none" stroke="#C8FF00" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M22 24h56v12H56v44H44V36H22z" fill="#F4F4F0"/>
+      <path d="M50 54 72 70" stroke="#C8FF00" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="74" cy="72" r="7" fill="#C8FF00"/>
+      <circle cx="50" cy="54" r="4.5" fill="#080808"/><circle cx="50" cy="54" r="2.5" fill="#C8FF00"/>
     </symbol>
-
-    <!-- 4. Орбита: ядро-ИИ и агенты на орбите, один из них лаймовый — активный такт -->
+    <!-- 4. Т-палочка: перекладина как взмах-дуга из узлов, ножка-палочка, лаймовое ядро наверху по центру -->
     <symbol id="i4" viewBox="0 0 100 100">
       <rect width="100" height="100" fill="#080808"/>
-      <ellipse cx="50" cy="50" rx="30" ry="14" fill="none" stroke="#F4F4F0" stroke-width="3.5" transform="rotate(-25 50 50)"/>
-      <circle cx="50" cy="50" r="9" fill="#F4F4F0"/>
-      <circle cx="76" cy="36" r="6.5" fill="#C8FF00"/>
-      <circle cx="26" cy="66" r="4.5" fill="#F4F4F0"/>
+      <path d="M24 38q26-16 52 0" stroke="#F4F4F0" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      <path d="M50 30v46" stroke="#F4F4F0" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="24" cy="38" r="6.5" fill="#F4F4F0"/><circle cx="76" cy="38" r="6.5" fill="#F4F4F0"/><circle cx="50" cy="76" r="6" fill="#F4F4F0"/>
+      <circle cx="50" cy="30" r="10" fill="#C8FF00"/>
     </symbol>
-
-    <!-- 5. Сигнал ИИ: четыре столбика-«голоса» модели, сильная доля лаймом и выше, снизу — тактовая черта -->
+    <!-- 5. Т в сети: буква из узлов, вокруг стыка лаймовое кольцо-орбита, узлы по концам -->
     <symbol id="i5" viewBox="0 0 100 100">
       <rect width="100" height="100" fill="#080808"/>
-      <g stroke-linecap="round" stroke-width="9">
-        <path d="M30 52v-26" stroke="#C8FF00"/>
-        <path d="M44 56V40M58 60V34M72 56V42" stroke="#F4F4F0"/>
-      </g>
-      <path d="M26 74h48" stroke="#F4F4F0" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="30" cy="74" r="5" fill="#C8FF00"/>
+      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round"><path d="M22 32h56M50 32v44"/></g>
+      <circle cx="22" cy="32" r="6" fill="#F4F4F0"/><circle cx="78" cy="32" r="6" fill="#F4F4F0"/><circle cx="50" cy="76" r="6" fill="#F4F4F0"/>
+      <circle cx="50" cy="32" r="13" fill="#080808" stroke="#C8FF00" stroke-width="4"/>
+      <circle cx="50" cy="32" r="5" fill="#C8FF00"/>
     </symbol>
-
-    <!-- 6. Нейросвязь-палочка: диагональная палочка из трёх узлов, верхний лаймовый, ответвления к двум агентам -->
+    <!-- 6. Т с искрой: белая Т из узлов, на правом конце перекладины лаймовая искра ИИ -->
     <symbol id="i6" viewBox="0 0 100 100">
       <rect width="100" height="100" fill="#080808"/>
-      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round">
-        <path d="M28 72 72 28M50 50 70 66M50 50 34 30"/>
-      </g>
-      <circle cx="28" cy="72" r="6" fill="#F4F4F0"/>
-      <circle cx="50" cy="50" r="6" fill="#F4F4F0"/>
-      <circle cx="70" cy="66" r="5" fill="#F4F4F0"/>
-      <circle cx="34" cy="30" r="5" fill="#F4F4F0"/>
-      <circle cx="72" cy="28" r="9" fill="#C8FF00"/>
+      <g stroke="#F4F4F0" stroke-width="4.5" stroke-linecap="round"><path d="M24 34h40M50 34v42"/></g>
+      <circle cx="24" cy="34" r="6.5" fill="#F4F4F0"/><circle cx="50" cy="34" r="6.5" fill="#F4F4F0"/><circle cx="50" cy="76" r="6.5" fill="#F4F4F0"/>
+      <path d="M74 18c1.5 10 4.5 13 14 14-9.5 1.5-12.5 4.5-14 14-1.5-9.5-4.5-12.5-14-14 9.5-1.5 12.5-4.5 14-14z" fill="#C8FF00"/>
     </symbol>
   </defs>
 </svg>
@@ -104,12 +88,12 @@
 
 <script>
 const V=[
- ['Дирижёр и агенты','Лаймовое ядро-ИИ и три белых узла-исполнителя на лучах. Нейросеть + оркестр: один дирижёр, три сателлита — ровно как карточки в приложении.'],
- ['Искра-палочка','Четырёхлучевая искра, ставшая знаком ИИ, у которой нижний луч вытянулся в дирижёрскую палочку. Лайм — вспышка идеи, белое — взмах.'],
- ['Чип в такт','Контур процессора с ножками, по центру лаймовая линия пульса: модель бьётся в такт. Самый «технологичный» вариант.'],
- ['Орбита','Белое ядро-модель и агенты на орбите вокруг него; активный — лаймовый. Читается как атом/ИИ-ассистент.'],
- ['Сигнал ИИ','Четыре столбика как голос модели или эквалайзер, сильная доля лаймом; внизу тактовая черта с точкой-долей.'],
- ['Нейросвязь-палочка','Диагональная палочка, собранная из узлов нейросети, с ответвлениями к двум агентам. Лаймовый узел наверху — кончик палочки.'],
+ ['Т из узлов','Перекладина и ножка из связей, узлы-исполнители по концам, лаймовое ядро в стыке буквы. Прямой наследник варианта 1.'],
+ ['Т-дерево','Ядро-дирижёр лаймом внизу ножки, от перекладины вниз свисают узлы-исполнители. Буква читается крупно, ядро — «держит» всех.'],
+ ['Жирная Т + ветка','Монолитная белая буква, из её центра лаймовая связь к узлу-агенту. Самая читаемая Т на 32 px.'],
+ ['Т-палочка','Перекладина изогнута как взмах палочки, ножка — сама палочка, лаймовое ядро наверху. Наследник варианта 6.'],
+ ['Т в сети','Буква из узлов, стык обведён лаймовым кольцом-орбитой. Больше «ИИ-ядра» в центре.'],
+ ['Т с искрой','Белая Т из узлов, на правом плече лаймовая искра ИИ. Буква + узнаваемый знак нейросетей.'],
 ];
 const g=document.getElementById('grid');
 V.forEach((v,i)=>{

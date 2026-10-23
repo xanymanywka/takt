@@ -1,7 +1,7 @@
-# Оркестр
+# Такт
 
 ## Backlog
-- [ ] Имя и иконка приложения — выбор владельца из вариантов (блокирует репо и identifier)
+- [ ] Переименование в код: productName `Takt`, title «Такт», identifier `space.xanyman.takt` (после мёржа core/ui)
 - [ ] Публичный репозиторий на GitHub `xanymanywka`, лицензия PolyForm Noncommercial, README RU/EN/UK
 - [ ] Релизы: `release.yml` → universal `.dmg` в GitHub Releases, подпись обновлений
 - [ ] Автообновление `tauri-plugin-updater` + плашка «Доступна версия X»
@@ -35,5 +35,7 @@
 ## Review
 
 ## Done
+- [x] Имя «Такт» и иконка (вариант 5 серии 3: Т из узлов с лаймовым кольцом), набор для Tauri (23.10.2026)
+- [x] Схема архитектуры Archify `docs/architecture/takt.html` (23.10.2026)
 - [x] Дизайн «Партитура», две темы, контраст под слабое зрение (23.10.2026)
 - [x] Скаффолд Tauri 2 + React 19 + TS, спека и IPC-контракт (23.10.2026)

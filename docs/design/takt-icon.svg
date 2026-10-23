@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Такт · иконка приложения · графит #080808 + лайм #C8FF00. Сквиркл 824 px с полями 100 px по рекомендациям macOS -->
+  <defs>
+    <clipPath id="sq"><path d="M512 100C190 100 100 190 100 512s90 412 412 412 412-90 412-412S834 100 512 100z"/></clipPath>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141414"/><stop offset="1" stop-color="#060606"/></linearGradient>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <g transform="translate(100 100) scale(8.24)">
+      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round"><path d="M22 32h56M50 32v44"/></g>
+      <circle cx="22" cy="32" r="6" fill="#F4F4F0"/><circle cx="78" cy="32" r="6" fill="#F4F4F0"/><circle cx="50" cy="76" r="6" fill="#F4F4F0"/>
+      <circle cx="50" cy="32" r="13" fill="#0A0A0A" stroke="#C8FF00" stroke-width="4"/>
+      <circle cx="50" cy="32" r="5" fill="#C8FF00"/>
+    </g>
+  </g>
+</svg>

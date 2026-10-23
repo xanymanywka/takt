@@ -1,7 +1,7 @@
 # TASK: Ядро Tauri — jobs, limits, conductor, pty, setup
 
 ## Цель
-Rust-сторона приложения «Оркестр» реализует IPC-контракт из `docs/SPEC.md` §7 целиком,
+Rust-сторона приложения «Такт» реализует IPC-контракт из `docs/SPEC.md` §7 целиком,
 поверх существующей оркестрации `~/.orchestra/agents.py` (tmux). После задачи `pnpm tauri dev`
 поднимает окно, и фронт (пишется параллельно другим исполнителем) получает реальные данные.
 
@@ -48,7 +48,7 @@ Rust-сторона приложения «Оркестр» реализует I
   раздачей, CodeRabbit `--gate major` перед мёржем, коммиты только от владельца репозитория,
   без Co-Authored-By. **Никаких упоминаний личного `~/.claude/CLAUDE.md`** — приложение его не трогает.
 - `src-tauri/capabilities/default.json` и `tauri.conf.json`: окно 1280×820, min 980×640,
-  `title: "Оркестр"`, identifier `space.xanyman.orchestra`, разрешения событий.
+  `title: "Такт"`, productName `Takt`, identifier `space.xanyman.takt`, разрешения событий.
 - `src-tauri/src/lib.rs`: регистрация всех команд и фоновых задач.
 
 ## Не делать
@@ -78,7 +78,7 @@ Rust-сторона приложения «Оркестр» реализует I
 
 ## Приёмка
 - [ ] `cd src-tauri && cargo check` → без ошибок и предупреждений `unused`
-- [ ] `pnpm install && pnpm tauri dev` поднимает окно «Оркестр» (фронт может быть заглушкой)
+- [ ] `pnpm install && pnpm tauri dev` поднимает окно «Такт» (фронт может быть заглушкой)
 - [ ] `list_jobs` на реальном `~/.orchestra/jobs.json` возвращает задачи с `steps` и `lastLine`
       (приложи JSON-вывод через временный `console.log` в devtools или `cargo test`)
 - [ ] `limits` возвращает три провайдера с числами (вывод приложи)
