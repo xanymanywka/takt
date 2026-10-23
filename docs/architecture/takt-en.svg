@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1380 900" width="1380" height="900" font-family="Montserrat, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-label="How Takt conducts coding agents">
+<style>
+  @keyframes flow { to { stroke-dashoffset: -28; } }
+  @keyframes pulse { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+  .edge { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+  .edge.main { stroke: #C8FF00; stroke-dasharray: 10 18; animation: flow 1.1s linear infinite; }
+  .edge.plain { stroke: #5c6069; stroke-dasharray: 6 10; animation: flow 1.6s linear infinite; }
+  .edge.dashed { stroke: #3d4149; stroke-dasharray: 3 9; animation: flow 2.4s linear infinite; }
+  .node { animation: rise .6s cubic-bezier(.23,1,.32,1) both; }
+  .node rect { fill: #121316; stroke-width: 1.5; }
+  .node .lab { fill: #f3f4f6; font-size: 19px; font-weight: 600; }
+  .node .sub { fill: #a8adb6; font-size: 14.5px; }
+  .elab { fill: #d2d6dd; font-size: 14px; }
+  .region { fill: rgba(200,255,0,.035); stroke: rgba(200,255,0,.35); stroke-dasharray: 4 6; }
+  .rlab { fill: #C8FF00; font-size: 13px; letter-spacing: .4px; }
+  .dot { fill: #C8FF00; animation: pulse 1.6s ease-in-out infinite; }
+  .title { fill: #f3f4f6; font-size: 26px; font-weight: 600; }
+</style>
+<rect width="1380" height="900" rx="24" fill="#080808"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C8FF00"/></marker></defs>
+<text class="title" x="40" y="48">How Takt conducts coding agents</text>
+<rect class="region" x="368" y="236" width="888" height="300" rx="18"/>
+<text class="rlab" x="382" y="256">Takt desktop app (Tauri)</text>
+<rect class="region" x="1028" y="606" width="228" height="286" rx="18"/>
+<text class="rlab" x="1042" y="626">~/.orchestra</text>
+<path class="edge main" d="M244,306.0 L390,306.0"/>
+<text class="elab" x="317.0" y="277.0" text-anchor="middle"><tspan x="317.0" dy="0">chat</tspan><tspan x="317.0" dy="17">with conductor</tspan></text>
+<circle class="dot" r="4"><animateMotion dur="1.8s" repeatCount="indefinite" path="M244,306.0 L390,306.0"/></circle>
+<path class="edge dashed" d="M482.0,168 L482.0,270"/>
+<text class="elab" x="494.0" y="224.0">same UI over LAN</text>
+<path class="edge plain" d="M482.0,342 L482.0,444"/>
+<text class="elab" x="494.0" y="398.0">localhost URL, images</text>
+<path class="edge main" d="M574,306.0 L720,306.0"/>
+<text class="elab" x="647.0" y="277.0" text-anchor="middle"><tspan x="647.0" dy="0">IPC: commands,</tspan><tspan x="647.0" dy="17">events</tspan></text>
+<circle class="dot" r="4"><animateMotion dur="1.8s" repeatCount="indefinite" path="M574,306.0 L720,306.0"/></circle>
+<path class="edge dashed" d="M812.0,168 L812.0,270"/>
+<text class="elab" x="824.0" y="224.0">update check</text>
+<path class="edge main" d="M904,306.0 L1050,306.0"/>
+<text class="elab" x="977.0" y="277.0" text-anchor="middle"><tspan x="977.0" dy="0">stream-json</tspan><tspan x="977.0" dy="17">via stdin</tspan></text>
+<circle class="dot" r="4"><animateMotion dur="1.8s" repeatCount="indefinite" path="M904,306.0 L1050,306.0"/></circle>
+<path class="edge plain" d="M1142.0,342 L1142.0,480.0 L904,480.0"/>
+<text class="elab" x="1023.0" y="451.0" text-anchor="middle"><tspan x="1023.0" dy="0">system prompt,</tspan><tspan x="1023.0" dy="17">--resume</tspan></text>
+<path class="edge main" d="M1142.0,342 L1142.0,640"/>
+<text class="elab" x="1154.0" y="496.0">run · send · tail</text>
+<circle class="dot" r="4"><animateMotion dur="1.8s" repeatCount="indefinite" path="M1142.0,342 L1142.0,640"/></circle>
+<path class="edge plain" d="M1142.0,712 L1142.0,800"/>
+<text class="elab" x="1154.0" y="761.0">task state</text>
+<path class="edge main" d="M1050,676.0 L904,676.0"/>
+<text class="elab" x="977.0" y="664.0" text-anchor="middle"><tspan x="977.0" dy="0">tmux sessions</tspan></text>
+<circle class="dot" r="4"><animateMotion dur="1.8s" repeatCount="indefinite" path="M1050,676.0 L904,676.0"/></circle>
+<path class="edge plain" d="M720,676.0 L574,676.0"/>
+<text class="elab" x="647.0" y="647.0" text-anchor="middle"><tspan x="647.0" dy="0">commits on</tspan><tspan x="647.0" dy="17">own branch</tspan></text>
+<g class="node" style="animation-delay:0ms"><rect x="60" y="270" width="184" height="72" rx="14" stroke="#8a8f98"/><text class="lab" x="76" y="301">You</text><text class="sub" x="76" y="324">at the keyboard</text></g>
+<g class="node" style="animation-delay:70ms"><rect x="390" y="96" width="184" height="72" rx="14" stroke="#8a8f98"/><text class="lab" x="406" y="127">Phone</text><text class="sub" x="406" y="150">PWA on the same Wi-Fi</text></g>
+<g class="node" style="animation-delay:140ms"><rect x="390" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="406" y="301">Takt UI</text><text class="sub" x="406" y="324">React 19 · two themes</text></g>
+<g class="node" style="animation-delay:210ms"><rect x="390" y="444" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="406" y="475">Preview pane</text><text class="sub" x="406" y="498">webview, image viewer</text></g>
+<g class="node" style="animation-delay:280ms"><rect x="720" y="96" width="184" height="72" rx="14" stroke="#7dd3fc"/><text class="lab" x="736" y="127">GitHub Releases</text><text class="sub" x="736" y="150">signed latest.json</text></g>
+<g class="node" style="animation-delay:350ms"><rect x="720" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="736" y="301">Takt core</text><text class="sub" x="736" y="324">Rust · Tauri 2</text></g>
+<g class="node" style="animation-delay:420ms"><rect x="1050" y="270" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="1066" y="301">Conductor</text><text class="sub" x="1066" y="324">claude -p stream-json</text></g>
+<g class="node" style="animation-delay:490ms"><rect x="720" y="444" width="184" height="72" rx="14" stroke="#f0abfc"/><text class="lab" x="736" y="475">Conductor memory</text><text class="sub" x="736" y="498">prompt + session ids</text></g>
+<g class="node" style="animation-delay:560ms"><rect x="1050" y="640" width="184" height="72" rx="14" stroke="#C8FF00"/><text class="lab" x="1066" y="671">agents.py</text><text class="sub" x="1066" y="694">tmux orchestrator</text></g>
+<g class="node" style="animation-delay:630ms"><rect x="1050" y="800" width="184" height="72" rx="14" stroke="#f0abfc"/><text class="lab" x="1066" y="831">jobs.json</text><text class="sub" x="1066" y="854">~/.orchestra registry</text></g>
+<g class="node" style="animation-delay:700ms"><rect x="720" y="640" width="184" height="72" rx="14" stroke="#8a8f98"/><text class="lab" x="736" y="671">Executors</text><text class="sub" x="736" y="694">Codex · agy · Claude</text></g>
+<g class="node" style="animation-delay:770ms"><rect x="390" y="640" width="184" height="72" rx="14" stroke="#f0abfc"/><text class="lab" x="406" y="671">Git worktrees</text><text class="sub" x="406" y="694">one branch per task</text></g>
+</svg>

@@ -34,7 +34,10 @@
 
 ### Архитектура
 
-Интерактивная схема: [`docs/architecture/takt.html`](docs/architecture/takt.html) (откройте в браузере).
+<p align="center">
+  <img src="docs/architecture/takt-ru.svg" width="100%" alt="Как «Такт» дирижирует агентами: вы → интерфейс → ядро → дирижёр → agents.py → исполнители → git-ворктри">
+</p>
+
 Подробно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ### Установка
@@ -82,7 +85,10 @@ checked acceptance items from `TASK-<slug>.md`, never a made-up percentage.
 
 ### Architecture
 
-Interactive diagram: [`docs/architecture/takt.html`](docs/architecture/takt.html).
+<p align="center">
+  <img src="docs/architecture/takt-en.svg" width="100%" alt="How Takt conducts coding agents: you → UI → core → conductor → agents.py → executors → git worktrees">
+</p>
+
 Full spec: [`docs/SPEC.md`](docs/SPEC.md) (Russian). Design system: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ### Install
@@ -130,7 +136,10 @@ commercial products. Contact the author for commercial use.
 
 ### Архітектура
 
-Інтерактивна схема: [`docs/architecture/takt.html`](docs/architecture/takt.html).
+<p align="center">
+  <img src="docs/architecture/takt-uk.svg" width="100%" alt="Як «Такт» диригує агентами: ви → інтерфейс → ядро → диригент → agents.py → виконавці → git-ворктрі">
+</p>
+
 Докладно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ### Встановлення
