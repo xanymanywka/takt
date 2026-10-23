@@ -1,7 +1,7 @@
 [package]
 name = "orchestra"
 version = "0.1.0"
-description = "Оркестр — дирижирование агентами"
+description = "Takt — дирижирование агентами"
 authors = ["xanymanywka"]
 edition = "2024"
 
@@ -22,6 +22,13 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+portable-pty = "0.9"
+notify = "8"
+dirs = "6"
+regex = "1"
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
