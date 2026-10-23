@@ -5,64 +5,13 @@
 <h1 align="center">Такт</h1>
 
 <p align="center">
-  Десктоп-приложение для дирижирования агентами кода.<br>
-  Один чат с дирижёром, под его репликой — исполнители с честным прогрессом по шагам.
+  Desktop app for conducting coding agents.<br>
+  One chat with the conductor; under its reply, executors with honest step-by-step progress.
 </p>
 
 <p align="center">
-  <a href="#russian">Русский</a> · <a href="#english">English</a> · <a href="#ukrainian">Українська</a>
+  <a href="#english">English</a> · <a href="#ukrainian">Українська</a> · <a href="#russian">Русский</a>
 </p>
-
----
-
-<a id="russian"></a>
-## Русский
-
-**Такт** заменяет Emdash, Conductor, Vibe Kanban и подобные панели одной идеей: вы разговариваете
-с главным агентом (Claude Code, «дирижёр»), а он раздаёт задачи исполнителям — Codex, Antigravity, Claude.
-Каждая задача живёт в своей git-ворктри, у каждого исполнителя своя карточка с реальным прогрессом:
-отмеченные пункты приёмки из `TASK-<slug>.md`, а не выдуманные проценты.
-
-### Что внутри
-
-- **Чат · Код · Оркестр.** Чат с дирижёром, встроенный терминал, таблица всех задач по всем проектам.
-- **Партитура.** Карточки исполнителей под репликой дирижёра: состояние, шаги, экран tmux, кнопки «Ответить» и «Снять».
-- **Лимиты подписок** Claude, Codex и Antigravity прямо в шапке.
-- **Доступы.** MCP-серверы, CLI, SSH-ключи, аккаунты GitHub — в одном месте. Входы вы делаете сами в своём терминале, приложение не хранит токены.
-- **Две темы** с контрастом ≥ 7:1 и кеглем ≥ 12.5 px, шрифты Montserrat и Newsreader.
-- **Обновления** из GitHub Releases с проверкой подписи.
-
-### Архитектура
-
-<p align="center">
-  <img src="docs/architecture/takt-ru.svg" width="100%" alt="Как «Такт» дирижирует агентами: вы → интерфейс → ядро → дирижёр → agents.py → исполнители → git-ворктри">
-</p>
-
-Подробно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
-
-### Установка
-
-1. Скачайте `Takt_<версия>_universal.dmg` из [Releases](https://github.com/xanymanywka/takt/releases/latest).
-2. Перетащите «Такт» в «Программы». При первом запуске macOS спросит разрешение на открытие приложения не из App Store.
-3. Запустите. Мастер первого старта проверит `claude`, `codex`, `agy`, `tmux`, `codexbar` и предложит поставить недостающее.
-
-### Сборка из исходников
-
-```bash
-pnpm install
-pnpm dev          # интерфейс на моках, http://localhost:1420
-pnpm tauri dev    # приложение целиком (нужен Rust stable)
-pnpm tauri build  # .app и .dmg в src-tauri/target/release/bundle
-```
-
-### Лицензия
-
-[PolyForm Noncommercial 1.0.0](LICENSE): пользоваться и менять для себя можно, продавать и встраивать
-в коммерческие продукты нельзя. Для коммерческого использования напишите автору.
-
-### Автор
-
-[xanyman.space](https://xanyman.space) · Telegram [@xanymanywka](https://t.me/xanymanywka)
 
 ---
 
@@ -161,6 +110,57 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 
 [PolyForm Noncommercial 1.0.0](LICENSE): користуватися і змінювати для себе можна, продавати і вбудовувати
 в комерційні продукти не можна. Для комерційного використання напишіть автору.
+
+### Автор
+
+[xanyman.space](https://xanyman.space) · Telegram [@xanymanywka](https://t.me/xanymanywka)
+
+---
+
+<a id="russian"></a>
+## Русский
+
+**Такт** заменяет Emdash, Conductor, Vibe Kanban и подобные панели одной идеей: вы разговариваете
+с главным агентом (Claude Code, «дирижёр»), а он раздаёт задачи исполнителям — Codex, Antigravity, Claude.
+Каждая задача живёт в своей git-ворктри, у каждого исполнителя своя карточка с реальным прогрессом:
+отмеченные пункты приёмки из `TASK-<slug>.md`, а не выдуманные проценты.
+
+### Что внутри
+
+- **Чат · Код · Оркестр.** Чат с дирижёром, встроенный терминал, таблица всех задач по всем проектам.
+- **Партитура.** Карточки исполнителей под репликой дирижёра: состояние, шаги, экран tmux, кнопки «Ответить» и «Снять».
+- **Лимиты подписок** Claude, Codex и Antigravity прямо в шапке.
+- **Доступы.** MCP-серверы, CLI, SSH-ключи, аккаунты GitHub — в одном месте. Входы вы делаете сами в своём терминале, приложение не хранит токены.
+- **Две темы** с контрастом ≥ 7:1 и кеглем ≥ 12.5 px, шрифты Montserrat и Newsreader.
+- **Обновления** из GitHub Releases с проверкой подписи.
+
+### Архитектура
+
+<p align="center">
+  <img src="docs/architecture/takt-ru.svg" width="100%" alt="Как «Такт» дирижирует агентами: вы → интерфейс → ядро → дирижёр → agents.py → исполнители → git-ворктри">
+</p>
+
+Подробно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
+
+### Установка
+
+1. Скачайте `Takt_<версия>_universal.dmg` из [Releases](https://github.com/xanymanywka/takt/releases/latest).
+2. Перетащите «Такт» в «Программы». При первом запуске macOS спросит разрешение на открытие приложения не из App Store.
+3. Запустите. Мастер первого старта проверит `claude`, `codex`, `agy`, `tmux`, `codexbar` и предложит поставить недостающее.
+
+### Сборка из исходников
+
+```bash
+pnpm install
+pnpm dev          # интерфейс на моках, http://localhost:1420
+pnpm tauri dev    # приложение целиком (нужен Rust stable)
+pnpm tauri build  # .app и .dmg в src-tauri/target/release/bundle
+```
+
+### Лицензия
+
+[PolyForm Noncommercial 1.0.0](LICENSE): пользоваться и менять для себя можно, продавать и встраивать
+в коммерческие продукты нельзя. Для коммерческого использования напишите автору.
 
 ### Автор
 
