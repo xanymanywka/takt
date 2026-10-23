@@ -1,28 +1,32 @@
 # Takt
 
 ## Backlog
-- [ ] Экран «Модели»: все доступные модели по провайдерам, популярные сверху
 - [ ] Панель «Результат» в чате: встроенный браузер на localhost, картинки, md/pdf, дифф (SPEC §11)
 - [ ] Телефон-компаньон: QR/ручная привязка, LAN-сервер axum+WS+mDNS, PWA с тем же UI (SPEC §12)
 - [ ] Windows и Linux: матрица сборки, platform.rs, запуск исполнителей без tmux через PTY (SPEC §13)
 - [ ] Импорт чатов и проектов из Claude / Codex / Copilot / Cursor / Gemini при первом старте
 - [ ] Несколько аккаунтов GitHub в «Доступах»
-- [ ] Локальные модели (Ollama) по месту на диске
+- [ ] Исполнители на локальных моделях Ollama (список уже в экране «Модели», запуск через них — отдельная задача)
 - [ ] Пак рекомендуемых навыков при онбординге
 - [ ] Мастер миграции для других пользователей (свой INSTRUCTIONS.md, свои проекты)
 
 ## In progress
-- [ ] Замечания CodeRabbit по UI (minor, после мёржа 23.10.2026): клавиатурный доступ к строкам проектов/ворктри/SSH
-  (кнопки вместо div), «—» вместо выдуманных процентов лимитов, шрифты Montserrat/Newsreader в бандл
-  (`@fontsource`), переключатель вкладок без `role="tab"` + `aria-pressed`
 - [ ] Ключ подписи обновлений (только владелец): `pnpm tauri signer generate -w ~/.tauri/takt.key`, pubkey в
   `src-tauri/tauri.conf.json`, секреты `TAURI_SIGNING_PRIVATE_KEY[_PASSWORD]` в GitHub — см. `docs/HANDOFF-updater.md`
-- [ ] Дымовой тест 23.10.2026, остаток: проверить, что `job_kill` реально убивает tmux-окно; `conductor_send` и `pty_open`
-  вживую ещё не прогнаны
 
 ## Review
 
 ## Done
+- [x] Экран «Модели» (SPEC §10): `src-tauri/src/models.rs` собирает списки из `claude --help`, кэша Codex, `agy models`
+  и `ollama list`, выбор пишется в `~/.orchestra/models.json`, `job_run` передаёт `--model` в `agents.py`; фронт
+  `src/screens/Models.tsx` + общая навигация `SetupNav`, популярные чипами, полный список по клику, i18n uk/en/ru,
+  6 юнит-тестов (23.10.2026)
+- [x] Замечания CodeRabbit по UI: кнопки вместо div для проектов/ворктри/SSH-строк и «О программе», вкладки с
+  `role="tab"` + `aria-selected`, шрифты Montserrat/Newsreader в бандле через `@fontsource-variable` (Google Fonts
+  из `index.html` убран), выдуманный хост `nova-welcome-1` убран из мока (23.10.2026)
+- [x] Дымовой тест, остаток 23.10.2026: `job_kill` → `agents.py kill` реально убивает tmux-сессию (проверено на
+  `takt-smoke`, `jobs.json` не тронут); живые тесты `pty::live_zsh_pty_emits_prompt_and_pwd` и
+  `conductor::live_conductor_stream` проходят (`cargo test -- --ignored`)
 - [x] i18n uk/en/ru (`src/i18n`, `t()` с плюралами через `Intl.PluralRules`, переключатель в шапке и группа «Язык»
   в «Доступах»), экран «О программе» (автор, сайт, Telegram, GitHub, лицензия, проверка обновлений), плашка
   «Поддержать» из `src/about/support.json` (пока пустой — реквизиты вносит владелец), `scripts/check-i18n.mjs`

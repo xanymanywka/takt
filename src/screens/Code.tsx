@@ -39,15 +39,16 @@ export const Code: React.FC = () => {
                 : 'var(--acc)';
 
             return (
-              <div
+              <button
                 key={wt}
+                type="button"
                 className="wt-item"
                 aria-current={isCurrent ? 'true' : undefined}
                 onClick={() => setActiveWorktree(wt)}
               >
                 <span className="wt-dot" style={{ background: dotColor }} />
                 <span>{wt}</span>
-              </div>
+              </button>
             );
           })}
         </aside>

@@ -354,15 +354,31 @@ svg {
   border-radius: var(--r3);
   color: var(--fg2);
   font-size: 14px;
-  cursor: pointer;
   transition: background .16s var(--ease);
 }
 
-.proj li:hover {
+.proj li:has(> .proj-btn) {
+  padding: 0;
+}
+
+.proj li .proj-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: var(--r3);
+  text-align: left;
+  color: inherit;
+}
+
+.proj li:hover,
+.proj li .proj-btn:hover {
   background: rgba(var(--ink), .04);
 }
 
-.proj li[aria-current="true"] {
+.proj li[aria-current="true"],
+.proj li .proj-btn[aria-current="true"] {
   background: rgba(var(--ink), .07);
   color: var(--fg);
 }
@@ -480,7 +496,7 @@ svg {
   transition: color .18s var(--ease), background .18s var(--ease);
 }
 
-.seg button[aria-pressed="true"] {
+.seg button[aria-selected="true"] {
   color: var(--fg);
   background: var(--raised);
   box-shadow: 0 1px 0 rgba(var(--ink), .07) inset, 0 1px 3px rgba(0, 0, 0, calc(.45 * var(--k)));
@@ -1361,6 +1377,17 @@ svg {
   transition: background .16s var(--ease);
 }
 
+/* Строка как кнопка (SSH-хосты, модели): растягиваем на ширину контейнера с учётом отрицательных полей. */
+button.row {
+  width: calc(100% + 16px);
+  text-align: left;
+  color: inherit;
+}
+
+button.row:focus-visible {
+  border-radius: var(--r2);
+}
+
 .rows .row:first-child {
   border-top: 0;
 }
@@ -1539,9 +1566,11 @@ svg {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 7px 10px;
   border-radius: var(--r3);
   font-size: 13.5px;
+  text-align: left;
   color: var(--fg2);
   transition: background .16s;
 }
@@ -1785,13 +1814,182 @@ svg {
 }
 
 .setnav li.about-nav {
-  cursor: pointer;
   margin-top: 8px;
   color: var(--fg2);
 }
 
-.setnav li.about-nav:hover {
+/* Кликабельные пункты онбординга: кнопка повторяет сетку li, сам li теряет внутренние поля. */
+.setnav li:has(> .setnav-link) {
+  display: block;
+  padding: 0;
+}
+
+.setnav .setnav-link {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: var(--r3);
+  text-align: left;
+  color: inherit;
+  transition: background .16s var(--ease), color .16s var(--ease);
+}
+
+.setnav .setnav-link:hover {
+  background: rgba(var(--ink), .04);
   color: var(--fg);
+}
+
+.setnav li[aria-current="true"] .setnav-link {
+  color: var(--fg);
+}
+
+.setnav li.off .setnav-link:hover {
+  color: var(--fg2);
+}
+
+/* ===== Модели ===== */
+.models-grp h3 {
+  align-items: center;
+}
+
+.models-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--acc);
+  flex: none;
+}
+
+.models-dot.codex {
+  background: var(--codex);
+}
+
+.models-dot.agy {
+  background: var(--agy);
+}
+
+.models-dot.ollama {
+  background: var(--muted);
+}
+
+.models-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.models-current .k {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--ok);
+}
+
+.models-chips {
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.models-chips .lang-btn:disabled {
+  cursor: progress;
+  opacity: .7;
+}
+
+.lang-btn.models-default {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  font-weight: 500;
+}
+
+.lang-btn.models-default.is-active {
+  background: var(--acc);
+  box-shadow: none;
+  color: #080808;
+  font-weight: 600;
+}
+
+.models-more {
+  margin-top: 10px;
+  padding: 4px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg2);
+  text-decoration: underline;
+  text-decoration-color: var(--hair);
+  text-underline-offset: 3px;
+  transition: color .16s var(--ease), text-decoration-color .16s var(--ease);
+}
+
+.models-more:hover {
+  color: var(--fg);
+  text-decoration-color: var(--acc);
+}
+
+.models-rows {
+  margin-top: 6px;
+}
+
+.models-row {
+  grid-template-columns: 22px 1fr auto;
+}
+
+.models-row .ic {
+  color: var(--ok);
+}
+
+.models-ring {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: 0 auto;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--faint);
+}
+
+.models-row.is-active {
+  background: rgba(var(--ink), .05);
+}
+
+.models-row .ok {
+  color: var(--muted);
+}
+
+.models-row:disabled {
+  cursor: progress;
+}
+
+.models-note {
+  margin: 8px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.models-note.is-warn {
+  color: var(--warn);
+}
+
+.models-error {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--r2);
+  background: var(--warn-dim);
+  color: var(--warn);
+  font-size: 13.5px;
+}
+
+.models-loading {
+  margin: 18px 0 0;
+  font-size: 14px;
+  color: var(--muted);
 }
 
 /* ===== О программе ===== */

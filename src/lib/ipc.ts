@@ -84,6 +84,32 @@ export interface Setup {
   mcp: McpServer[];
 }
 
+// ---- Модели (SPEC.md §10) ----
+export type ModelProviderId = 'claude' | 'codex' | 'agy' | 'ollama';
+
+export interface ModelInfo {
+  id: string;
+  label: string;
+  popular: boolean;
+  note?: string;
+}
+
+export interface ModelProvider {
+  id: ModelProviderId;
+  found: boolean;
+  source: string;
+  models: ModelInfo[];
+  selected?: string;
+  error?: string;
+}
+
+export interface ModelsInfo {
+  path: string;
+  providers: ModelProvider[];
+}
+
+export type ModelSelection = Record<string, string>;
+
 export type UnlistenFn = () => void;
 
 export function isTauriEnv(): boolean {
@@ -200,6 +226,19 @@ export async function pty_close(id: string): Promise<void> {
 export async function open_in_terminal(cwd: string, command?: string): Promise<void> {
   if (isTauriEnv()) return tauriInvoke<void>('open_in_terminal', { cwd, command });
   return mock.open_in_terminal(cwd, command);
+}
+
+export async function list_models(): Promise<ModelsInfo> {
+  if (isTauriEnv()) return tauriInvoke<ModelsInfo>('list_models');
+  return mock.list_models();
+}
+
+export async function save_model(
+  provider: ModelProviderId,
+  model: string | null
+): Promise<ModelSelection> {
+  if (isTauriEnv()) return tauriInvoke<ModelSelection>('save_model', { provider, model });
+  return mock.save_model(provider, model);
 }
 
 // ---- События (listen) ----

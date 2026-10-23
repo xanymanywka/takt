@@ -1,6 +1,12 @@
 import React from 'react';
 import { useT } from '../i18n';
-import { useStore } from '../store';
+import { useStore, type TabType } from '../store';
+
+const TABS: Array<{ id: TabType; key: string }> = [
+  { id: 'chat', key: 'tabs.chat' },
+  { id: 'code', key: 'tabs.code' },
+  { id: 'orchestra', key: 'tabs.orchestra' },
+];
 
 /** Переключатель Чат · Код · Оркестр, общий для трёх экранов. */
 export const Tabs: React.FC = () => {
@@ -10,19 +16,18 @@ export const Tabs: React.FC = () => {
 
   return (
     <div className="seg" role="tablist" aria-label={t('tabs.label')}>
-      <button role="tab" aria-pressed={tab === 'chat'} onClick={() => setTab('chat')}>
-        {t('tabs.chat')}
-      </button>
-      <button role="tab" aria-pressed={tab === 'code'} onClick={() => setTab('code')}>
-        {t('tabs.code')}
-      </button>
-      <button
-        role="tab"
-        aria-pressed={tab === 'orchestra'}
-        onClick={() => setTab('orchestra')}
-      >
-        {t('tabs.orchestra')}
-      </button>
+      {TABS.map(({ id, key }) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={tab === id}
+          tabIndex={tab === id ? 0 : -1}
+          onClick={() => setTab(id)}
+        >
+          {t(key)}
+        </button>
+      ))}
     </div>
   );
 };

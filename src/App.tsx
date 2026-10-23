@@ -5,6 +5,7 @@ import { UpdateBanner } from './components/UpdateBanner';
 import { About } from './screens/About';
 import { Chat } from './screens/Chat';
 import { Code } from './screens/Code';
+import { Models } from './screens/Models';
 import { Orchestra } from './screens/Orchestra';
 import { Start } from './screens/Start';
 import { useStore } from './store';
@@ -43,6 +44,7 @@ function App() {
 
       {screen === 'start' && <Start />}
       {screen === 'about' && <About />}
+      {screen === 'models' && <Models />}
       {screen === 'chat' && (
         <div className="win" id="chat">
           <Sidebar />

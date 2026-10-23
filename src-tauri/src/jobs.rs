@@ -91,6 +91,8 @@ struct RawJob {
     state: String,
     handed_to: Option<String>,
     takeover_of: Option<String>,
+    /// Модель, явно переданная при запуске (`agents run … --model`).
+    model: Option<String>,
 }
 
 fn running_state() -> String {
@@ -234,7 +236,11 @@ async fn enrich_job(name: String, raw: RawJob) -> Job {
         takeover_of: raw.takeover_of,
         steps,
         last_line,
-        model: Some(model_from_screen(raw.agent, &screen)),
+        model: Some(
+            raw.model
+                .clone()
+                .unwrap_or_else(|| model_from_screen(raw.agent, &screen)),
+        ),
     }
 }
 
@@ -307,6 +313,15 @@ pub async fn job_run(
     ];
     if let Some(name) = name {
         args.extend(["--name".to_owned(), name]);
+    }
+    // Экран «Модели»: выбор из ~/.orchestra/models.json (ключи claude / codex / agy).
+    let provider = match agent {
+        AgentKind::Codex => "codex",
+        AgentKind::Gemini => "agy",
+        AgentKind::Claude => "claude",
+    };
+    if let Some(model) = crate::models::selected_for(provider) {
+        args.extend(["--model".to_owned(), model]);
     }
     let actual_name = run_zsh(&agents_command(&args)?, None).await?;
     collect_jobs()

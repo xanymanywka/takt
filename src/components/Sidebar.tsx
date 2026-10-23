@@ -42,17 +42,20 @@ export const Sidebar: React.FC = () => {
             const isCurrent = activeProject?.name === proj.name;
             const isLive = isCurrent && hasRunningJobs;
             return (
-              <li
-                key={proj.name}
-                aria-current={isCurrent ? 'true' : undefined}
-                onClick={() => setActiveProject(proj)}
-              >
-                <span
-                  className="dot"
-                  style={{ background: proj.color || '#9b86d6' }}
-                />
-                <span className="n">{proj.name}</span>
-                {isLive && <span className="live" title={t('side.live')} />}
+              <li key={proj.name} aria-current={isCurrent ? 'true' : undefined}>
+                <button
+                  type="button"
+                  className="proj-btn"
+                  aria-current={isCurrent ? 'true' : undefined}
+                  onClick={() => setActiveProject(proj)}
+                >
+                  <span
+                    className="dot"
+                    style={{ background: proj.color || '#9b86d6' }}
+                  />
+                  <span className="n">{proj.name}</span>
+                  {isLive && <span className="live" title={t('side.live')} />}
+                </button>
               </li>
             );
           })}

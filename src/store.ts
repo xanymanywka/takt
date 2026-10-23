@@ -22,7 +22,7 @@ import {
 } from './lib/updater';
 import { getLocale, setLocale as applyLocale, t, type Locale } from './i18n';
 
-export type ScreenType = 'chat' | 'start' | 'about';
+export type ScreenType = 'chat' | 'start' | 'about' | 'models';
 export type TabType = 'chat' | 'code' | 'orchestra';
 export type ThemeType = 'light' | 'dark';
 export type UpdateCheckStatus = 'idle' | 'checking' | 'current' | 'available' | 'error';

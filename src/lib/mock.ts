@@ -1,6 +1,9 @@
 import type {
   Job,
   Limit,
+  ModelProviderId,
+  ModelSelection,
+  ModelsInfo,
   Project,
   Setup,
   UnlistenFn,
@@ -356,4 +359,74 @@ export async function pty_close(_id: string): Promise<void> {}
 
 export async function open_in_terminal(cwd: string, command?: string): Promise<void> {
   console.log('[mock open_in_terminal]', cwd, command);
+}
+
+// ---- Модели ----
+const mockSelection: ModelSelection = { claude: 'opus' };
+
+const MOCK_MODELS: ModelsInfo = {
+  path: '~/.orchestra/models.json',
+  providers: [
+    {
+      id: 'claude',
+      found: true,
+      source: 'claude --help',
+      models: [
+        { id: 'fable', label: 'fable', popular: true, note: 'Fable 5.1' },
+        { id: 'opus', label: 'opus', popular: true, note: 'Opus 5.5' },
+        { id: 'sonnet', label: 'sonnet', popular: true, note: 'Sonnet 5.5' },
+        { id: 'claude-fable-5-1', label: 'claude-fable-5-1', popular: false },
+        { id: 'claude-opus-5-5', label: 'claude-opus-5-5', popular: false },
+        { id: 'claude-sonnet-5-5', label: 'claude-sonnet-5-5', popular: false },
+        { id: 'claude-haiku-5-5', label: 'claude-haiku-5-5', popular: false },
+      ],
+    },
+    {
+      id: 'codex',
+      found: true,
+      source: '~/.codex/models_cache.json',
+      models: [
+        { id: 'gpt-6-sol', label: 'gpt-6-sol', popular: true, note: 'low · medium · high · xhigh' },
+        { id: 'gpt-6-sol-mini', label: 'gpt-6-sol-mini', popular: false, note: 'low · medium · high' },
+        { id: 'gpt-5.5-codex', label: 'gpt-5.5-codex', popular: false, note: 'medium · high' },
+      ],
+    },
+    {
+      id: 'agy',
+      found: true,
+      source: 'agy models',
+      models: [
+        { id: 'gemini-3.8-pro-high', label: 'Gemini 3.8 Pro (High)', popular: true },
+        { id: 'gemini-3.8-flash-high', label: 'Gemini 3.8 Flash (High)', popular: true },
+        { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash', popular: false },
+      ],
+    },
+    {
+      id: 'ollama',
+      found: true,
+      source: 'ollama list',
+      models: [
+        { id: 'qwen2.5-coder:7b', label: 'qwen2.5-coder:7b', popular: true, note: '4.7 GB' },
+        { id: 'llama3.1:8b', label: 'llama3.1:8b', popular: false, note: '4.9 GB' },
+      ],
+    },
+  ],
+};
+
+export async function list_models(): Promise<ModelsInfo> {
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  const info = JSON.parse(JSON.stringify(MOCK_MODELS)) as ModelsInfo;
+  for (const provider of info.providers) {
+    provider.selected = mockSelection[provider.id];
+  }
+  return info;
+}
+
+export async function save_model(
+  provider: ModelProviderId,
+  model: string | null
+): Promise<ModelSelection> {
+  if (model) mockSelection[provider] = model;
+  else delete mockSelection[provider];
+  return { ...mockSelection };
 }

@@ -30,8 +30,8 @@
   --warn-dim2: rgba(143, 77, 0, .22);
   --glass: rgba(255, 255, 255, .82);
   --lights: #c9cdc3;
-  --ui: "Montserrat", system-ui, sans-serif;
-  --voice: "Newsreader", Georgia, serif;
+  --ui: "Montserrat Variable", "Montserrat", system-ui, sans-serif;
+  --voice: "Newsreader Variable", "Newsreader", Georgia, serif;
   --r: 14px;
   --r2: 10px;
   --r3: 7px;

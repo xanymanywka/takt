@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import {
   ArrowRightIcon,
-  CheckIcon,
-  CircleTodoIcon,
   CodeRabbitIcon,
-  DotIcon,
   GhIcon,
   ServerHostIcon,
   TerminalIcon,
   WranglerIcon,
 } from '../components/Icons';
+import { SetupNav } from '../components/SetupNav';
 import { LOCALES, useLocale, useT, type Locale } from '../i18n';
 import { open_in_terminal, write_instructions } from '../lib/ipc';
 import { useStore } from '../store';
@@ -18,7 +16,6 @@ export const Start: React.FC = () => {
   const t = useT();
   const locale = useLocale();
   const setLocale = useStore((state) => state.setLocale);
-  const setScreen = useStore((state) => state.setScreen);
   const setup = useStore((state) => state.setup);
   const updateChecksEnabled = useStore((state) => state.updateChecksEnabled);
   const updateCheckStatus = useStore((state) => state.updateCheckStatus);
@@ -26,9 +23,7 @@ export const Start: React.FC = () => {
   const checkUpdate = useStore((state) => state.checkUpdate);
   const setUpdateChecks = useStore((state) => state.setUpdateChecks);
 
-  const [openSshRows, setOpenSshRows] = useState<Record<string, boolean>>({
-    'nova-welcome-1': true,
-  });
+  const [openSshRows, setOpenSshRows] = useState<Record<string, boolean>>({});
 
   const [instructionsCreated, setInstructionsCreated] = useState(false);
 
@@ -78,65 +73,7 @@ export const Start: React.FC = () => {
           <i />
         </div>
 
-        <div className="proj">
-          <h3>{t('start.nav.title')}</h3>
-          <ul className="setnav">
-            <li>
-              <span className="k">
-                <CheckIcon />
-              </span>
-              {t('start.nav.conductor')}
-            </li>
-            <li>
-              <span className="k">
-                <CheckIcon />
-              </span>
-              {t('start.nav.workers')}
-            </li>
-            <li>
-              <span className="k">
-                <CheckIcon />
-              </span>
-              {t('start.nav.import')}
-            </li>
-            <li>
-              <span className="k">
-                <CheckIcon />
-              </span>
-              {t('start.nav.github')}
-            </li>
-            <li aria-current="true">
-              <span className="k now">
-                <DotIcon />
-              </span>
-              {t('start.nav.access')}
-            </li>
-            <li className="off">
-              <span className="k todo">
-                <CircleTodoIcon />
-              </span>
-              {t('start.nav.instructions')}
-            </li>
-            <li className="off">
-              <span className="k todo">
-                <CircleTodoIcon />
-              </span>
-              {t('start.nav.models')}
-            </li>
-            <li className="off">
-              <span className="k todo">
-                <CircleTodoIcon />
-              </span>
-              {t('start.nav.skills')}
-            </li>
-            <li className="about-nav" onClick={() => setScreen('about')}>
-              <span className="k">
-                <ArrowRightIcon />
-              </span>
-              {t('start.nav.about')}
-            </li>
-          </ul>
-        </div>
+        <SetupNav current="access" />
 
         <div className="limits">
           <h3>{t('start.step', { step: 5, total: 8 })}</h3>
@@ -167,9 +104,11 @@ export const Start: React.FC = () => {
                 const agents = host.agents || { claude: true, codex: true, agy: true };
 
                 return (
-                  <div
+                  <button
                     key={host.host}
+                    type="button"
                     className={`row ${isOpen ? 'open' : ''}`}
+                    aria-expanded={isOpen}
                     onClick={() => toggleSshRow(host.host)}
                   >
                     <span className="ic">
@@ -230,7 +169,7 @@ export const Start: React.FC = () => {
                         )}
                       </div>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
