@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Lead } from './components/Lead';
 import { Sidebar } from './components/Sidebar';
+import { UpdateBanner } from './components/UpdateBanner';
 import { Chat } from './screens/Chat';
 import { Code } from './screens/Code';
 import { Orchestra } from './screens/Orchestra';
@@ -37,6 +38,7 @@ function App() {
   return (
     <div className="page">
       <Lead />
+      <UpdateBanner />
 
       {screen === 'start' ? (
         <Start />
