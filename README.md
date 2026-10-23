@@ -42,9 +42,19 @@ Full spec: [`docs/SPEC.md`](docs/SPEC.md) (Russian). Design system: [`docs/DESIG
 
 ### Install
 
-1. Download `Takt_<version>_universal.dmg` from [Releases](https://github.com/xanymanywka/takt/releases/latest).
-2. Drag Takt to Applications. On first launch macOS asks to confirm opening an app from outside the App Store.
-3. Run it. The first-start wizard checks `claude`, `codex`, `agy`, `tmux`, `codexbar` and offers to install what is missing.
+One line in Terminal (macOS):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xanymanywka/takt/main/scripts/install.sh | sh
+```
+
+It downloads the latest release into `/Applications` and launches it. No Gatekeeper warning: the build is not
+notarized by Apple, and Safari/Finder would quarantine a `.dmg`, but `curl` does not. Later versions arrive through
+the built-in updater. The first-start wizard checks `claude`, `codex`, `agy`, `tmux`, `codexbar` and offers to
+install what is missing.
+
+Prefer the `.dmg` from [Releases](https://github.com/xanymanywka/takt/releases/latest)? macOS will block the first
+launch; clear the flag once with `xattr -dr com.apple.quarantine /Applications/Takt.app`.
 
 ### Build from source
 
@@ -93,9 +103,19 @@ commercial products. Contact the author for commercial use.
 
 ### Встановлення
 
-1. Завантажте `Takt_<версія>_universal.dmg` з [Releases](https://github.com/xanymanywka/takt/releases/latest).
-2. Перетягніть Takt у «Програми». Під час першого запуску macOS попросить підтвердити відкриття застосунку не з App Store.
-3. Запустіть. Майстер першого старту перевірить `claude`, `codex`, `agy`, `tmux`, `codexbar` і запропонує поставити те, чого бракує.
+Один рядок у Терміналі (macOS):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xanymanywka/takt/main/scripts/install.sh | sh
+```
+
+Скрипт завантажує останній реліз у `/Applications` і запускає його. Попередження Gatekeeper не буде: збірка не
+нотаризована Apple, і Safari/Finder поставили б карантин на `.dmg`, а `curl` цього не робить. Наступні версії
+приходять через вбудоване оновлення. Майстер першого старту перевірить `claude`, `codex`, `agy`, `tmux`, `codexbar`
+і запропонує поставити те, чого бракує.
+
+Хочете `.dmg` з [Releases](https://github.com/xanymanywka/takt/releases/latest)? macOS заблокує перший запуск;
+зніміть прапорець один раз: `xattr -dr com.apple.quarantine /Applications/Takt.app`.
 
 ### Збирання з джерел
 
@@ -144,9 +164,19 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 
 ### Установка
 
-1. Скачайте `Takt_<версия>_universal.dmg` из [Releases](https://github.com/xanymanywka/takt/releases/latest).
-2. Перетащите Takt в «Программы». При первом запуске macOS спросит разрешение на открытие приложения не из App Store.
-3. Запустите. Мастер первого старта проверит `claude`, `codex`, `agy`, `tmux`, `codexbar` и предложит поставить недостающее.
+Одна строка в Терминале (macOS):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xanymanywka/takt/main/scripts/install.sh | sh
+```
+
+Скрипт скачивает последний релиз в `/Applications` и запускает его. Предупреждения Gatekeeper не будет: сборка не
+нотаризована Apple, и Safari/Finder поставили бы карантин на `.dmg`, а `curl` этого не делает. Следующие версии
+приходят через встроенное обновление. Мастер первого старта проверит `claude`, `codex`, `agy`, `tmux`, `codexbar`
+и предложит поставить недостающее.
+
+Нужен `.dmg` из [Releases](https://github.com/xanymanywka/takt/releases/latest)? macOS заблокирует первый запуск;
+снимите флаг один раз: `xattr -dr com.apple.quarantine /Applications/Takt.app`.
 
 ### Сборка из исходников
 

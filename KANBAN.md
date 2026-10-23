@@ -15,6 +15,8 @@
 ## Review
 
 ## Done
+- [x] Установка без учётки разработчика и без диалога Gatekeeper: `scripts/install.sh` (curl → `/Applications`,
+  без карантина), команда в README на трёх языках и в описании релиза; проверено на v0.2.1 (23.10.2026)
 - [x] Ключ подписи обновлений: пара в `~/.tauri/takt.key`, pubkey в `tauri.conf.json`, приватный ключ в секрете
   `TAURI_SIGNING_PRIVATE_KEY`; локальная сборка подписывается, первый релиз `v0.2.1` через `release.yml`
   (см. `docs/HANDOFF-updater.md`, 23.10.2026)
