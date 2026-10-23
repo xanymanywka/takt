@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets and local state
+.env
+.env.*
+*.key
+*.pem
+*.p12
+.claude/settings.local.json
+src-tauri/gen/

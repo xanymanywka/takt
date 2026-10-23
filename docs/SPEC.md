@@ -181,7 +181,7 @@ KANBAN.md
 
 ## 9. Публикация, обновления, защита (v0.2)
 
-- **Репозиторий** — публичный, на аккаунте GitHub `xanymanywka` (не `you-work`). README:
+- **Репозиторий** — публичный, на аккаунте GitHub `xanymanywka`. README:
   описание, скриншоты обеих тем, анимированная схема архитектуры (`docs/architecture.*`),
   инструкция «скачать → установить → настроить за 5 минут».
 - **Сборка и релизы** — GitHub Actions `release.yml`: `pnpm tauri build` на `macos-latest`

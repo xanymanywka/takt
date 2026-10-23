@@ -59,7 +59,7 @@ export const Start: React.FC = () => {
   const sshHosts = setup?.ssh || [];
   const tools = setup?.tools || [];
   const mcpList = setup?.mcp || [];
-  const mcpNames = mcpList.slice(0, 3).map((m) => m.name).join(', ') || 'context7, github, nova-crm';
+  const mcpNames = mcpList.slice(0, 3).map((m) => m.name).join(', ') || 'context7, github, postgres';
   const mcpExtra = Math.max(0, mcpList.length - 3);
 
   const getToolIcon = (id: string) => {
