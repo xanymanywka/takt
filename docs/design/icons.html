@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Такт — варианты иконки, серия 2 (ИИ)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080808;--fg:#F4F4F0;--mut:#B8B8B0;--acc:#C8FF00;--card:#111;--line:#262626}
+  :root[data-theme=light]{--bg:#F6F6F2;--fg:#0A0A0A;--mut:#4A4A46;--acc:#7CA000;--card:#fff;--line:#D8D8D2}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Montserrat,system-ui,sans-serif;padding:40px 32px}
+  h1{font-size:28px;font-weight:600;margin:0 0 6px}
+  p{color:var(--mut);margin:0 0 28px;max-width:760px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+  .v{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+  .v h2{font-size:17px;font-weight:600;margin:0 0 4px}
+  .v h2 span{color:var(--acc);margin-right:10px}
+  .v .d{color:var(--mut);font-size:13.5px;margin:0 0 16px;min-height:80px}
+  .row{display:flex;align-items:flex-end;gap:18px}
+  .row svg{display:block}
+  .dock{display:flex;gap:12px;align-items:flex-end;background:linear-gradient(#2a2a2a,#161616);padding:10px 12px;border-radius:14px;margin-top:16px}
+  .dock.l{background:linear-gradient(#f0f0ec,#d9d9d3)}
+  .dock svg{width:48px;height:48px}
+  .tg{position:fixed;top:20px;right:24px;background:var(--card);border:1px solid var(--line);color:var(--fg);padding:8px 14px;border-radius:999px;font:inherit;cursor:pointer}
+</style>
+</head>
+<body>
+<button class="tg" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'dark':'light'">Тема</button>
+<h1>Такт — иконка, серия 2: ИИ + дирижёр</h1>
+<p>Каждый знак читается как ИИ (узлы, искра, чип, сигнал) и одновременно как такт/дирижирование. Сквиркл macOS, графит #080808 + лайм #C8FF00. Размеры 128 / 64 / 32 и вид в доке.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <clipPath id="sq" clipPathUnits="objectBoundingBox">
+      <path d="M.5 0C.11 0 0 .11 0 .5S.11 1 .5 1 1 .89 1 .5 .89 0 .5 0z"/>
+    </clipPath>
+
+    <!-- 1. Дирижёр и агенты: лаймовый узел-ядро, три белых узла-исполнителя на связях -->
+    <symbol id="i1" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#080808"/>
+      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round">
+        <path d="M50 56 30 30M50 56 70 30M50 56v22"/>
+      </g>
+      <circle cx="30" cy="30" r="7" fill="#F4F4F0"/>
+      <circle cx="70" cy="30" r="7" fill="#F4F4F0"/>
+      <circle cx="50" cy="78" r="7" fill="#F4F4F0"/>
+      <circle cx="50" cy="56" r="11" fill="#C8FF00"/>
+    </symbol>
+
+    <!-- 2. Искра-палочка: четырёхлучевая искра ИИ, нижний луч вытянут в дирижёрскую палочку -->
+    <symbol id="i2" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#080808"/>
+      <path d="M62 20c2 14 6 18 20 20-14 2-18 6-20 20-2-14-6-18-20-20 14-2 18-6 20-20z" fill="#C8FF00"/>
+      <path d="M58 44 26 76" stroke="#F4F4F0" stroke-width="6" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 3. Чип в такт: контур процессора, по нему идёт линия пульса с лаймовым ударом -->
+    <symbol id="i3" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#080808"/>
+      <rect x="26" y="26" width="48" height="48" rx="8" fill="none" stroke="#F4F4F0" stroke-width="4"/>
+      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round">
+        <path d="M38 26V18M50 26V18M62 26V18M38 74v8M50 74v8M62 74v8M26 38h-8M26 50h-8M26 62h-8M74 38h8M74 50h8M74 62h8"/>
+      </g>
+      <path d="M34 50h10l5-12 6 24 5-12h6" fill="none" stroke="#C8FF00" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- 4. Орбита: ядро-ИИ и агенты на орбите, один из них лаймовый — активный такт -->
+    <symbol id="i4" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#080808"/>
+      <ellipse cx="50" cy="50" rx="30" ry="14" fill="none" stroke="#F4F4F0" stroke-width="3.5" transform="rotate(-25 50 50)"/>
+      <circle cx="50" cy="50" r="9" fill="#F4F4F0"/>
+      <circle cx="76" cy="36" r="6.5" fill="#C8FF00"/>
+      <circle cx="26" cy="66" r="4.5" fill="#F4F4F0"/>
+    </symbol>
+
+    <!-- 5. Сигнал ИИ: четыре столбика-«голоса» модели, сильная доля лаймом и выше, снизу — тактовая черта -->
+    <symbol id="i5" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#080808"/>
+      <g stroke-linecap="round" stroke-width="9">
+        <path d="M30 52v-26" stroke="#C8FF00"/>
+        <path d="M44 56V40M58 60V34M72 56V42" stroke="#F4F4F0"/>
+      </g>
+      <path d="M26 74h48" stroke="#F4F4F0" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="30" cy="74" r="5" fill="#C8FF00"/>
+    </symbol>
+
+    <!-- 6. Нейросвязь-палочка: диагональная палочка из трёх узлов, верхний лаймовый, ответвления к двум агентам -->
+    <symbol id="i6" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#080808"/>
+      <g stroke="#F4F4F0" stroke-width="4" stroke-linecap="round">
+        <path d="M28 72 72 28M50 50 70 66M50 50 34 30"/>
+      </g>
+      <circle cx="28" cy="72" r="6" fill="#F4F4F0"/>
+      <circle cx="50" cy="50" r="6" fill="#F4F4F0"/>
+      <circle cx="70" cy="66" r="5" fill="#F4F4F0"/>
+      <circle cx="34" cy="30" r="5" fill="#F4F4F0"/>
+      <circle cx="72" cy="28" r="9" fill="#C8FF00"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const V=[
+ ['Дирижёр и агенты','Лаймовое ядро-ИИ и три белых узла-исполнителя на лучах. Нейросеть + оркестр: один дирижёр, три сателлита — ровно как карточки в приложении.'],
+ ['Искра-палочка','Четырёхлучевая искра, ставшая знаком ИИ, у которой нижний луч вытянулся в дирижёрскую палочку. Лайм — вспышка идеи, белое — взмах.'],
+ ['Чип в такт','Контур процессора с ножками, по центру лаймовая линия пульса: модель бьётся в такт. Самый «технологичный» вариант.'],
+ ['Орбита','Белое ядро-модель и агенты на орбите вокруг него; активный — лаймовый. Читается как атом/ИИ-ассистент.'],
+ ['Сигнал ИИ','Четыре столбика как голос модели или эквалайзер, сильная доля лаймом; внизу тактовая черта с точкой-долей.'],
+ ['Нейросвязь-палочка','Диагональная палочка, собранная из узлов нейросети, с ответвлениями к двум агентам. Лаймовый узел наверху — кончик палочки.'],
+];
+const g=document.getElementById('grid');
+V.forEach((v,i)=>{
+ const id='i'+(i+1);
+ const use=(s)=>`<svg width="${s}" height="${s}" style="clip-path:url(#sq)"><use href="#${id}" width="${s}" height="${s}"/></svg>`;
+ const nb=`<svg width="48" height="48" style="clip-path:url(#sq)"><rect width="48" height="48" fill="#3478F6"/></svg><svg width="48" height="48" style="clip-path:url(#sq)"><rect width="48" height="48" fill="#E9E9E4"/></svg>`;
+ g.insertAdjacentHTML('beforeend',`<div class="v"><h2><span>${i+1}</span>${v[0]}</h2><p class="d">${v[1]}</p>
+ <div class="row">${use(128)}${use(64)}${use(32)}</div>
+ <div class="dock">${use(48)}${nb}</div><div class="dock l">${use(48)}${nb}</div></div>`);
+});
+</script>
+</body>
+</html>

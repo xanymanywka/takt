@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Takt — how the app conducts coding agents",
+    "locale": "en",
+    "output": "docs/architecture/takt.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "owner", "type": "external", "label": "You", "sublabel": "owner at the keyboard", "icon": "person", "pos": [40, 300], "size": [130, 64] },
+    { "id": "phone", "type": "external", "label": "Phone", "sublabel": "PWA on the same Wi-Fi", "tag": "QR pairing", "pos": [330, 150], "size": [130, 64] },
+    { "id": "ui", "type": "frontend", "label": "Takt UI", "sublabel": "React 19 · two themes", "pos": [330, 300], "size": [130, 64] },
+    { "id": "preview", "type": "frontend", "label": "Preview pane", "sublabel": "webview, image viewer", "pos": [330, 460], "size": [130, 64] },
+    { "id": "releases", "type": "cloud", "label": "GitHub Releases", "sublabel": "signed latest.json", "pos": [620, 150], "size": [130, 64] },
+    { "id": "core", "type": "backend", "label": "Takt core", "sublabel": "Rust · Tauri 2", "tag": "limits · PTY · updater", "pos": [620, 300], "size": [130, 64] },
+    { "id": "conductor", "type": "backend", "label": "Conductor", "sublabel": "claude -p stream-json", "pos": [910, 300], "size": [130, 64] },
+    { "id": "memory", "type": "database", "label": "Conductor memory", "sublabel": "prompt + session ids", "pos": [910, 460], "size": [130, 64] },
+    { "id": "jobs", "type": "database", "label": "jobs.json", "sublabel": "~/.orchestra registry", "pos": [1200, 150], "size": [130, 64] },
+    { "id": "agents", "type": "backend", "label": "agents.py", "sublabel": "tmux orchestrator", "pos": [1200, 300], "size": [130, 64] },
+    { "id": "executors", "type": "external", "label": "Executors", "sublabel": "Codex · agy · Claude", "pos": [1490, 300], "size": [130, 64] },
+    { "id": "worktrees", "type": "database", "label": "Git worktrees", "sublabel": "one branch per task", "pos": [1490, 460], "size": [130, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Takt desktop app (Tauri)", "wraps": ["ui", "preview", "core", "conductor", "memory"] },
+    { "kind": "region", "label": "~/.orchestra", "wraps": ["jobs", "agents"] }
+  ],
+  "connections": [
+    { "id": "owner-ui", "from": "owner", "to": "ui", "label": "chat with conductor", "variant": "emphasis" },
+    { "id": "phone-ui", "from": "phone", "to": "ui", "label": "same UI over LAN", "variant": "dashed" },
+    { "id": "ui-preview", "from": "ui", "to": "preview", "label": "localhost URL, images" },
+    { "id": "ui-core", "from": "ui", "to": "core", "label": "IPC: commands, events", "variant": "emphasis" },
+    { "id": "releases-core", "from": "releases", "to": "core", "label": "update check", "variant": "dashed" },
+    { "id": "core-conductor", "from": "core", "to": "conductor", "label": "stream-json via stdin", "variant": "emphasis" },
+    { "id": "conductor-memory", "from": "conductor", "to": "memory", "label": "system prompt, --resume" },
+    { "id": "conductor-agents", "from": "conductor", "to": "agents", "label": "run · send · tail", "variant": "emphasis" },
+    { "id": "agents-jobs", "from": "agents", "to": "jobs", "label": "state, screen, steps" },
+    { "id": "agents-executors", "from": "agents", "to": "executors", "label": "tmux per worktree", "variant": "emphasis" },
+    { "id": "executors-worktrees", "from": "executors", "to": "worktrees", "label": "commits on branch" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Honest progress", "items": ["Each task is a TASK-<slug>.md with an acceptance checklist", "Progress = checked items, never a fake percentage", "Core watches jobs.json and tails tmux screens every 2 s"] },
+    { "dot": "amber", "title": "Executors stay separate", "items": ["Codex: crypto, auth, payments, migrations, hard logic", "Antigravity (agy): UI, i18n, docs, tests, large reads", "Claude: small edits and judgement calls", "One worktree, one executor, one branch"] },
+    { "dot": "cyan", "title": "Your machine only", "items": ["Logins happen in your own terminal, the app stores no tokens", "Phone pairs by QR over LAN, nothing goes through a cloud", "Updates come from GitHub Releases and are signature-checked"] }
+  ]
+}
