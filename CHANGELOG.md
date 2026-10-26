@@ -13,6 +13,11 @@ All notable changes to Takt. Dates are release dates; versions follow the app bu
 - Conductor events are scoped to their project: a reply arriving for a background project no longer
   lands in the active chat.
 
+### Changed
+- App icon: the glyph now fills about 65 % of the canvas instead of 40 %, so Takt no longer looks smaller
+  than neighbouring icons in Launchpad, the Dock and the Applications folder. Icon set regenerated from
+  `docs/design/takt-icon.svg`.
+
 ## 0.3.0 — 2026-10-26
 
 ### Added

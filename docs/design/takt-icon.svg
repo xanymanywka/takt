@@ -6,8 +6,9 @@
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#161616"/><stop offset="1" stop-color="#060606"/></linearGradient>
   </defs>
   <rect width="1024" height="1024" fill="url(#bg)"/>
-  <!-- Глифу 100×100 → масштаб 7.2, центр холста -->
-  <g transform="translate(152 123) scale(7.2)">
+  <!-- Глиф 100×100 → масштаб 9.4: рисунок занимает ~65 % холста (как у соседних иконок),
+       центр глифа (50; 50.25) совмещён с центром холста -->
+  <g transform="translate(42 39.65) scale(9.4)">
     <g stroke="#F4F4F0" stroke-width="4.4" stroke-linecap="round"><path d="M22 32h56M50 32v44"/></g>
     <circle cx="22" cy="32" r="6.5" fill="#F4F4F0"/><circle cx="78" cy="32" r="6.5" fill="#F4F4F0"/><circle cx="50" cy="76" r="6.5" fill="#F4F4F0"/>
     <circle cx="50" cy="32" r="14" fill="#0A0A0A" stroke="#C8FF00" stroke-width="4.4"/>

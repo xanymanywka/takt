@@ -21,6 +21,8 @@
 ## Review
 
 ## Done
+- [x] v0.3.1 · иконка: глиф увеличен с ~40 % до ~65 % холста (`translate(42 39.65) scale(9.4)` в
+  `docs/design/takt-icon.svg`), набор перегенерирован `pnpm tauri icon`, favicon обновлён (26.10.2026)
 - [x] v0.3.1 · история чата по проектам: `conductor/history.rs`, файлы `~/.orchestra/chats/<проект>.json`,
   импорт транскрипта Claude Code при первом открытии (сессия Takt, иначе самый свежий разговор папки),
   события дирижёра привязаны к проекту; IPC `chat_history`/`chat_record`, мок на localStorage (26.10.2026)
