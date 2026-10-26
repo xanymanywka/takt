@@ -1087,6 +1087,7 @@ async fn dispatch_command(state: &WebState, command: &str, args: Value) -> Resul
                 .as_ref()
                 .ok_or_else(|| "Команда недоступна без приложения".to_owned())?;
             as_json(crate::conductor::conductor_send(
+                app.clone(),
                 app.state::<crate::conductor::ConductorState>(),
                 args.project_path,
                 args.text,
@@ -1099,6 +1100,7 @@ async fn dispatch_command(state: &WebState, command: &str, args: Value) -> Resul
                 .as_ref()
                 .ok_or_else(|| "Команда недоступна без приложения".to_owned())?;
             as_json(crate::conductor::conductor_stop(
+                app.clone(),
                 app.state::<crate::conductor::ConductorState>(),
                 args.project_path,
             ))
