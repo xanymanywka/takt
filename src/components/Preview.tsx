@@ -10,7 +10,7 @@ import {
   type PreviewKind,
   type PreviewSource,
 } from '../lib/ipc';
-import { previewKey, useStore, type PreviewDevice } from '../store';
+import { previewKey, sourcesForJob, useStore, type PreviewDevice } from '../store';
 import {
   ChevronRightIcon,
   DesktopIcon,
@@ -240,7 +240,11 @@ const ImageView: React.FC<{ source: PreviewSource; sources: PreviewSource[] }> =
   }, []);
 
   const src = preview_file_src(source.path ?? '');
-  const beforeSrc = beforePath ? preview_file_src(beforePath) : '';
+  // Выбор мог устареть: источники приходят событием preview://changed
+  const effectiveBefore = others.some((s) => s.path === beforePath)
+    ? beforePath
+    : (twin?.path ?? others[0]?.path ?? '');
+  const beforeSrc = effectiveBefore ? preview_file_src(effectiveBefore) : '';
   const imgStyle: React.CSSProperties = { width: `${zoom}%` };
 
   return (
@@ -275,7 +279,7 @@ const ImageView: React.FC<{ source: PreviewSource; sources: PreviewSource[] }> =
             {compare && (
               <select
                 className="pv-select"
-                value={beforePath}
+                value={effectiveBefore}
                 onChange={(e) => setBeforePath(e.target.value)}
                 aria-label={t('preview.compareWith')}
               >
@@ -492,7 +496,7 @@ export const Preview: React.FC = () => {
   // ⌘\ (Ctrl+\ вне macOS) — открыть/свернуть панель
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+      if ((e.metaKey || e.ctrlKey) && (e.code === 'Backslash' || e.key === '\\')) {
         e.preventDefault();
         togglePreview();
       }
@@ -555,7 +559,7 @@ export const Preview: React.FC = () => {
 
   const activeKey = active ? previewKey(active) : null;
   const worktree =
-    (active?.path && jobs.find((j) => active.path!.split('/').includes(j.worktree))?.worktree) || projectPath;
+    (active && jobs.find((j) => sourcesForJob(j, [active]).length > 0)?.worktree) || projectPath;
 
   const openOutside = () => {
     if (!active) return;
