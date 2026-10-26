@@ -1,12 +1,15 @@
 import React from 'react';
 import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
-import { useStore } from '../store';
+import { sourcesForJob, useStore } from '../store';
+import { PanelIcon } from './Icons';
 import { AgentLogo, ClaudeLogo } from './BrandLogos';
 
 export const Score: React.FC = () => {
   const t = useT();
   const jobs = useStore((state) => state.jobs);
+  const previewSources = useStore((state) => state.previewSources);
+  const openPreview = useStore((state) => state.openPreview);
 
   const totalSteps = 5;
 
@@ -73,6 +76,8 @@ export const Score: React.FC = () => {
         const stepNum = currentIdx >= 0 ? currentIdx + 1 : doneCount;
         const stepOf = t('score.stepOf', { step: stepNum, total: steps.length || totalSteps });
 
+        const jobSources = sourcesForJob(job, previewSources);
+
         const statusText: React.ReactNode = (
           <>
             {stepOf} · <b>{job.state === 'asking' ? t('score.awaitingAnswer') : job.lastLine}</b>
@@ -107,6 +112,17 @@ export const Score: React.FC = () => {
               })}
             </div>
             <div className="st">{statusText}</div>
+            {jobSources.length > 0 && (
+              <button
+                type="button"
+                className="stave-result"
+                onClick={() => openPreview(jobSources[0])}
+                title={t('preview.openFor', { name: job.name })}
+                aria-label={t('preview.openFor', { name: job.name })}
+              >
+                <PanelIcon size={13} />
+              </button>
+            )}
           </div>
         );
       })}

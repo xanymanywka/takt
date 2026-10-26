@@ -8,9 +8,11 @@ import {
   list_jobs,
   list_projects,
   listen,
+  preview_sources,
   setup_status,
   type Job,
   type Limit,
+  type PreviewSource,
   type Project,
   type Setup,
 } from './lib/ipc';
@@ -26,10 +28,15 @@ export type ScreenType = 'chat' | 'start' | 'about' | 'models' | 'settings' | 'o
 export type TabType = 'chat' | 'code' | 'orchestra';
 export type ThemeType = 'light' | 'dark';
 export type UpdateCheckStatus = 'idle' | 'checking' | 'current' | 'available' | 'error';
+export type PreviewDevice = 'phone' | 'tablet' | 'desktop';
 
 const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 const UPDATE_CHECKS_STORAGE_KEY = 'takt-update-checks';
 const ONBOARDED_STORAGE_KEY = 'takt-onboarded';
+const PREVIEW_STORAGE_PREFIX = 'takt-preview:';
+const PREVIEW_MIN_WIDTH = 320;
+const PREVIEW_MAX_SHARE = 0.6;
+const PREVIEW_DEFAULT_SHARE = 0.4;
 
 let dismissedUpdateVersion: string | null = null;
 
@@ -62,6 +69,13 @@ interface OrchestraState {
   updateCheckMessage: string | null;
   onboarded: boolean;
   setupRefreshing: boolean;
+  previewOpen: boolean;
+  previewWidth: number;
+  previewSources: PreviewSource[];
+  previewActive: PreviewSource | null;
+  previewDevice: PreviewDevice;
+  /** Сколько источников появилось, пока панель была свёрнута (бейдж на полоске). */
+  previewNew: number;
 
   setScreen: (screen: ScreenType) => void;
   completeOnboarding: () => void;
@@ -80,6 +94,11 @@ interface OrchestraState {
   installUpdate: () => Promise<void>;
   dismissUpdate: () => void;
   setUpdateChecks: (enabled: boolean) => void;
+  togglePreview: () => void;
+  setPreviewWidth: (width: number) => void;
+  setPreviewDevice: (device: PreviewDevice) => void;
+  openPreview: (source: PreviewSource) => void;
+  loadPreviewSources: () => Promise<void>;
   init: () => Promise<() => void>;
 }
 
@@ -126,6 +145,45 @@ function initialMessages(): ChatMessage[] {
   ];
 }
 
+/** Ключ источника: путь файла или URL — одинаков между перезапусками. */
+export function previewKey(source: PreviewSource): string {
+  return `${source.kind}:${source.path ?? source.url ?? source.title}`;
+}
+
+function windowWidth(): number {
+  return typeof window === 'undefined' ? 1280 : window.innerWidth;
+}
+
+export function clampPreviewWidth(width: number): number {
+  const max = Math.max(PREVIEW_MIN_WIDTH, Math.round(windowWidth() * PREVIEW_MAX_SHARE));
+  return Math.min(max, Math.max(PREVIEW_MIN_WIDTH, Math.round(width)));
+}
+
+function readSavedPreview(projectPath: string): string | null {
+  try {
+    return localStorage.getItem(PREVIEW_STORAGE_PREFIX + projectPath);
+  } catch {
+    return null;
+  }
+}
+
+function savePreview(projectPath: string, source: PreviewSource): void {
+  try {
+    localStorage.setItem(PREVIEW_STORAGE_PREFIX + projectPath, previewKey(source));
+  } catch {}
+}
+
+/** Источники из ворктри задачи: путь файла лежит внутри `job.worktree`. */
+export function sourcesForJob(job: Job, sources: PreviewSource[]): PreviewSource[] {
+  const wt = job.worktree.replace(/\/+$/, '');
+  if (!wt) return [];
+  return sources.filter((source) => {
+    if (!source.path) return false;
+    if (wt.includes('/')) return source.path.startsWith(`${wt}/`);
+    return source.path.split('/').includes(wt);
+  });
+}
+
 const initialOnboarded = getInitialOnboarded();
 
 export const useStore = create<OrchestraState>((set, get) => ({
@@ -149,6 +207,12 @@ export const useStore = create<OrchestraState>((set, get) => ({
   updateError: null,
   updateCheckStatus: 'idle',
   updateCheckMessage: null,
+  previewOpen: false,
+  previewWidth: clampPreviewWidth(windowWidth() * PREVIEW_DEFAULT_SHARE),
+  previewSources: [],
+  previewActive: null,
+  previewDevice: 'desktop',
+  previewNew: 0,
 
   setScreen: (screen: ScreenType) => set({ screen }),
   setTab: (tab: TabType) => set({ tab }),
@@ -210,7 +274,10 @@ export const useStore = create<OrchestraState>((set, get) => ({
     });
   },
 
-  setActiveProject: (activeProject: Project) => set({ activeProject }),
+  setActiveProject: (activeProject: Project) => {
+    set({ activeProject, previewSources: [], previewActive: null, previewNew: 0 });
+    void get().loadPreviewSources();
+  },
 
   sendUserMessage: async (text: string) => {
     const trimmed = text.trim();
@@ -333,6 +400,40 @@ export const useStore = create<OrchestraState>((set, get) => ({
     set({ updateChecksEnabled, updateCheckMessage: null });
   },
 
+  togglePreview: () =>
+    set((state) => ({
+      previewOpen: !state.previewOpen,
+      previewNew: 0,
+      previewActive: state.previewActive ?? state.previewSources[0] ?? null,
+    })),
+
+  setPreviewWidth: (width: number) => set({ previewWidth: clampPreviewWidth(width) }),
+
+  setPreviewDevice: (previewDevice: PreviewDevice) => set({ previewDevice }),
+
+  openPreview: (source: PreviewSource) => {
+    const projectPath = get().activeProject?.path;
+    if (projectPath) savePreview(projectPath, source);
+    set({ previewActive: source, previewOpen: true, previewNew: 0 });
+  },
+
+  loadPreviewSources: async () => {
+    const projectPath = get().activeProject?.path;
+    if (!projectPath) return;
+    try {
+      const sources = await preview_sources(projectPath);
+      if (get().activeProject?.path !== projectPath) return;
+      const saved = readSavedPreview(projectPath);
+      const restored = saved ? sources.find((s) => previewKey(s) === saved) : undefined;
+      set((state) => ({
+        previewSources: sources,
+        previewActive: restored ?? state.previewActive ?? sources[0] ?? null,
+      }));
+    } catch (err: unknown) {
+      set({ error: errorMessage(err) });
+    }
+  },
+
   init: async () => {
     // 1. Применяем тему
     const th = get().theme;
@@ -367,6 +468,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
         limits: lmts,
         setup: stp,
       });
+      void get().loadPreviewSources();
     } catch (err: unknown) {
       console.error('Failed to load initial data:', err);
       set({ error: err instanceof Error ? err.message : String(err) });
@@ -384,6 +486,36 @@ export const useStore = create<OrchestraState>((set, get) => ({
       set({ limits: event.payload });
     });
     unlisteners.push(unlistenLimits);
+
+    const unlistenPreview = await listen<{ projectPath: string; sources: PreviewSource[] }>(
+      'preview://changed',
+      (e) => {
+        const { projectPath } = e.payload;
+        const seen = new Set<string>();
+        const sources = e.payload.sources.filter((s) => {
+          const key = previewKey(s);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        set((state) => {
+          if (state.activeProject?.path !== projectPath) return {};
+          const known = new Set(state.previewSources.map(previewKey));
+          const added = sources.filter((s) => !known.has(previewKey(s))).length;
+          const activeKey = state.previewActive ? previewKey(state.previewActive) : null;
+          return {
+            previewSources: sources,
+            previewActive:
+              (activeKey && sources.find((s) => previewKey(s) === activeKey)) ||
+              state.previewActive ||
+              sources[0] ||
+              null,
+            previewNew: state.previewOpen ? 0 : state.previewNew + added,
+          };
+        });
+      }
+    );
+    unlisteners.push(unlistenPreview);
 
     const unlistenConductor = await listen<{ projectPath: string; event: unknown }>(
       'conductor://event',

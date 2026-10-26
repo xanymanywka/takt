@@ -1,4 +1,4 @@
-import { invoke as tauriInvoke, isTauri } from '@tauri-apps/api/core';
+import { convertFileSrc, invoke as tauriInvoke, isTauri } from '@tauri-apps/api/core';
 import { listen as tauriListen } from '@tauri-apps/api/event';
 import * as mock from './mock';
 
@@ -109,6 +109,17 @@ export interface ModelsInfo {
 }
 
 export type ModelSelection = Record<string, string>;
+
+// ---- Предпросмотр результата (SPEC.md §11) ----
+export type PreviewKind = 'url' | 'image' | 'doc' | 'diff';
+
+export interface PreviewSource {
+  kind: PreviewKind;
+  path?: string;
+  url?: string;
+  title: string;
+  mtime: string;
+}
 
 export type UnlistenFn = () => void;
 
@@ -240,6 +251,39 @@ export async function save_model(
 ): Promise<ModelSelection> {
   if (isTauriEnv()) return tauriInvoke<ModelSelection>('save_model', { provider, model });
   return mock.save_model(provider, model);
+}
+
+export async function preview_sources(projectPath: string): Promise<PreviewSource[]> {
+  if (isTauriEnv()) return tauriInvoke<PreviewSource[]>('preview_sources', { projectPath });
+  return mock.preview_sources(projectPath);
+}
+
+/** Unified diff файла относительно ворктри; ядро уже обрезает большие диффы. */
+export async function preview_diff(path: string, worktree: string): Promise<string> {
+  if (isTauriEnv()) return tauriInvoke<string>('preview_diff', { path, worktree });
+  return mock.preview_diff(path, worktree);
+}
+
+/** Текст md/html/svg для режима «документ». */
+export async function preview_read(path: string): Promise<string> {
+  if (isTauriEnv()) return tauriInvoke<string>('preview_read', { path });
+  return mock.preview_read(path);
+}
+
+/** URL файла для `<img>`/`<iframe>`: в Tauri — asset protocol, в моке путь уже URL. */
+export function preview_file_src(path: string): string {
+  if (isTauriEnv()) return convertFileSrc(path);
+  return mock.preview_file_src(path);
+}
+
+/** «Открыть снаружи»: системный браузер/просмотрщик. */
+export async function open_external(target: string, isUrl: boolean): Promise<void> {
+  if (isTauriEnv()) {
+    const opener = await import('@tauri-apps/plugin-opener');
+    if (isUrl) return opener.openUrl(target);
+    return opener.openPath(target);
+  }
+  window.open(isUrl ? target : preview_file_src(target), '_blank', 'noopener');
 }
 
 // ---- События (listen) ----

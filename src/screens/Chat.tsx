@@ -1,5 +1,6 @@
 import React from 'react';
 import { ClaudeLogo } from '../components/BrandLogos';
+import { PanelIcon } from '../components/Icons';
 import { Composer } from '../components/Composer';
 import { Score } from '../components/Score';
 import { Satellite } from '../components/Satellite';
@@ -12,6 +13,9 @@ export const Chat: React.FC = () => {
   const activeProject = useStore((state) => state.activeProject);
   const messages = useStore((state) => state.messages);
   const jobs = useStore((state) => state.jobs);
+  const previewOpen = useStore((state) => state.previewOpen);
+  const previewNew = useStore((state) => state.previewNew);
+  const togglePreview = useStore((state) => state.togglePreview);
 
   const projectName = activeProject?.name || 'Takt';
   const workerCount = jobs.length;
@@ -33,8 +37,21 @@ export const Chat: React.FC = () => {
       <div className="top">
         <Tabs />
         <div className="where">
-          <b>{projectName}</b> · {t('chat.branch', { branch: 'design-v3' })}{' '}
+          <span className="where-path">
+            <b>{projectName}</b> · {t('chat.branch', { branch: 'design-v3' })}
+          </span>
           <span className="pill">{t('chat.workers', { count: workerCount })}</span>
+          <button
+            type="button"
+            className="pv-open-btn"
+            aria-pressed={previewOpen}
+            onClick={togglePreview}
+            title={`${t(previewOpen ? 'preview.collapse' : 'preview.open')} · ⌘\\`}
+          >
+            <PanelIcon size={14} />
+            {t('preview.title')}
+            {!previewOpen && previewNew > 0 && <span className="pv-badge">{previewNew}</span>}
+          </button>
         </div>
       </div>
 

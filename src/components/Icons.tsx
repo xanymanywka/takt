@@ -232,3 +232,203 @@ export const ArrowLeftIcon: React.FC<IconProps> = ({ size = 14, ...props }) => (
     <path d="M11 7H3M6.5 3.5 3 7l3.5 3.5" />
   </svg>
 );
+
+export const PanelIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect x="2" y="3" width="12" height="10" rx="2" />
+    <path d="M9.5 3v10" />
+  </svg>
+);
+
+export const ExternalIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" />
+  </svg>
+);
+
+export const ReloadIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3" />
+  </svg>
+);
+
+export const ChevronRightIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="m6 3.5 4.5 4.5L6 12.5" />
+  </svg>
+);
+
+export const GlobeIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="8" cy="8" r="5.8" />
+    <path d="M2.2 8h11.6M8 2.2c1.7 1.6 2.5 3.5 2.5 5.8S9.7 12.2 8 13.8C6.3 12.2 5.5 10.3 5.5 8S6.3 3.8 8 2.2Z" />
+  </svg>
+);
+
+export const ImageIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect x="2" y="3" width="12" height="10" rx="2" />
+    <circle cx="6" cy="6.5" r="1.2" />
+    <path d="m2.5 12 3.5-3.5 2.5 2.5 2-2 3 3" />
+  </svg>
+);
+
+export const DocIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M4 1.8h5l3 3v9.4H4z" />
+    <path d="M9 1.8v3h3M6 8.5h4M6 11h4" />
+  </svg>
+);
+
+export const DiffIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M5 2.5v6M2 5.5h6M8 12h6M11 10v4" />
+  </svg>
+);
+
+export const PhoneIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect x="4.5" y="1.8" width="7" height="12.4" rx="1.6" />
+    <path d="M7.2 12h1.6" />
+  </svg>
+);
+
+export const TabletIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect x="2.8" y="1.8" width="10.4" height="12.4" rx="1.6" />
+    <path d="M7.2 12h1.6" />
+  </svg>
+);
+
+export const DesktopIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect x="1.8" y="2.5" width="12.4" height="8.5" rx="1.4" />
+    <path d="M5.5 14h5M8 11v3" />
+  </svg>
+);
+
+export const MinusIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M3.5 8h9" />
+  </svg>
+);

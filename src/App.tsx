@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Lead } from './components/Lead';
+import { Preview } from './components/Preview';
 import { Sidebar } from './components/Sidebar';
 import { UpdateBanner } from './components/UpdateBanner';
 import { About } from './screens/About';
@@ -55,6 +56,7 @@ function App() {
           {tab === 'chat' && <Chat />}
           {tab === 'code' && <Code />}
           {tab === 'orchestra' && <Orchestra />}
+          {tab === 'chat' && <Preview />}
         </div>
       )}
     </div>
