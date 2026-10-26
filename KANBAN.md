@@ -17,18 +17,23 @@
 - [ ] Перевод ошибок ядра (сейчас только по-русски) под язык интерфейса
 
 ## In progress
-- [ ] v0.3 · ядро предпросмотра `preview.rs` (источники url/image/doc/diff, вотчер, asset protocol, CSP) —
-  Codex, ворктри `preview-core`, `docs/TASK-preview-core.md` (26.10.2026)
-- [ ] v0.3 · панель «Результат» во фронте: `Preview.tsx`, режимы веб/картинка/документ/дифф, тянущаяся панель,
-  `⌘\`, кнопка на карточках исполнителей, i18n — Claude, ворктри `preview-ui`, `docs/TASK-preview-ui.md` (26.10.2026)
-- [ ] v0.3 · сервер компаньона `companion.rs`: axum+rustls, mDNS, привязка QR/код, WS-протокол §7, реестр устройств,
-  `companion_*` IPC — Codex, ворктри `companion-core`, `docs/TASK-companion-core.md` (26.10.2026)
-- [ ] v0.3 · платформенный слой `platform.rs`, PTY-раннер без tmux, матрица release/ci для macOS/Windows/Linux —
-  Codex, ворктри `platform`, `docs/TASK-platform.md` (26.10.2026)
+- [ ] v0.3 · выбор дирижёра: Claude Code / Codex CLI / Antigravity (`conductor.json`, адаптеры CLI с нормализацией
+  событий к формату stream-json, шаг «Дирижёр» в мастере, радиогруппа в настройках, обобщённые тексты) — Claude,
+  ворктри `conductor-choice`, `docs/TASK-conductor-choice.md` (26.10.2026)
 
 ## Review
 
 ## Done
+- [x] v0.3 · платформенный слой `platform.rs`: PTY-раннер исполнителей без tmux (`portable-pty`, буфер 2000 строк,
+  `runner: "pty"` в `jobs.json`), `open_in_terminal`/оболочка по ОС, матрица `release.yml` macOS/Windows/Linux
+  (msi+nsis, deb+appimage) и `ci.yml` на трёх ОС; мёрж `platform` → main `a82f411` (26.10.2026)
+- [x] v0.3 · сервер компаньона `companion.rs`: axum+rustls на случайном порту, самоподписанный сертификат, mDNS
+  `_orchestra._tcp`, привязка токен/код (TTL 5 мин, рейт-лимит), WS с Bearer, реестр устройств, `companion_*` IPC,
+  автостарт; мёрж `companion-core` → main `6bd237e` (26.10.2026)
+- [x] v0.3 · ядро предпросмотра `preview.rs`: источники url (lsof) / image / doc / diff, вотчер с дебаунсом, asset
+  protocol и CSP `frame-src localhost`; мёрж `preview-core` → main `20ba786` (26.10.2026)
+- [x] v0.3 · панель «Результат» (`Preview.tsx`): веб/картинка/документ/дифф, тянущаяся панель, `⌘\`, кнопки на
+  карточках исполнителей, i18n; мёрж `preview-ui` → main (26.10.2026)
 - [x] v0.2.2: полноэкранная раскладка, экран «Настройки», мастер первого запуска (6 шагов, перезапуск из настроек),
   фон окна DMG под фирстиль (`src-tauri/dmg`, `scripts/dmg-background.mjs`), быстрые правки по ревью: белый список
   команд `open_in_terminal`, проверка `~/.orchestra/agents.py` в мастере, заголовок приёмки на трёх языках, CSP,
