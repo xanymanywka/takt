@@ -724,6 +724,43 @@ mod tests {
     }
 
     #[test]
+    fn parses_porcelain_status_including_renames() {
+        // Переименование в `-z` занимает две записи: новый путь, затем старый — старый пропускаем.
+        let output = b" M src/a.rs\0?? new.md\0R  src/new.rs\0src/old.rs\0A  img/shot.png\0";
+        let paths = parse_status_paths(output);
+        assert_eq!(
+            paths,
+            vec![
+                PathBuf::from("src/a.rs"),
+                PathBuf::from("new.md"),
+                PathBuf::from("src/new.rs"),
+                PathBuf::from("img/shot.png"),
+            ]
+        );
+        assert!(parse_status_paths(b"").is_empty());
+    }
+
+    #[test]
+    fn diff_boundary_rejects_paths_outside_worktree() {
+        let worktree = temporary_directory("worktree");
+        let outside = temporary_directory("elsewhere");
+        let inside = worktree.join("file.rs");
+        fs::write(&inside, "fn main() {}").unwrap();
+        fs::write(outside.join("file.rs"), "fn other() {}").unwrap();
+
+        let (path, root) = ensure_within(&inside, &worktree).unwrap();
+        assert!(path.starts_with(&root));
+        assert!(ensure_within(&outside.join("file.rs"), &worktree).is_err());
+        assert!(ensure_within(&worktree, &worktree).is_err());
+        // Ещё не созданный файл внутри ворктри (untracked-кандидат) проходит границу.
+        assert!(ensure_within(&worktree.join("fresh.md"), &worktree).is_ok());
+        assert!(ensure_within(&worktree.join("../escape.md"), &worktree).is_err());
+
+        fs::remove_dir_all(worktree).unwrap();
+        fs::remove_dir_all(outside).unwrap();
+    }
+
+    #[test]
     fn truncates_diff_on_utf8_boundary_with_marker() {
         let diff = "я".repeat(MAX_DIFF_BYTES);
         let truncated = truncate_diff(diff);
