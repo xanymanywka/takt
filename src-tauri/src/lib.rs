@@ -2,6 +2,7 @@ mod conductor;
 mod jobs;
 mod limits;
 mod models;
+mod preview;
 mod projects;
 mod pty;
 mod setup;
@@ -11,6 +12,7 @@ use conductor::{ConductorState, conductor_send, conductor_start, conductor_stop}
 use jobs::{job_kill, job_new, job_run, job_screen, job_send, list_jobs, write_task};
 use limits::limits;
 use models::{list_models, save_model};
+use preview::{preview_diff, preview_read, preview_sources};
 use projects::{list_projects, save_projects};
 use pty::{PtyState, pty_close, pty_open, pty_resize, pty_write};
 use setup::{open_in_terminal, setup_status, write_instructions};
@@ -45,6 +47,9 @@ pub fn run() {
             open_in_terminal,
             list_models,
             save_model,
+            preview_sources,
+            preview_diff,
+            preview_read,
         ])
         .setup(|app| {
             #[cfg(desktop)]
@@ -52,6 +57,7 @@ pub fn run() {
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
             jobs::start_watcher(app.handle().clone());
             limits::start_poller(app.handle().clone());
+            preview::start_watcher(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())
