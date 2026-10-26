@@ -1,9 +1,8 @@
 # Takt
 
 ## Backlog
-- [ ] Панель «Результат» в чате: встроенный браузер на localhost, картинки, md/pdf, дифф (SPEC §11)
-- [ ] Телефон-компаньон: QR/ручная привязка, LAN-сервер axum+WS+mDNS, PWA с тем же UI (SPEC §12)
-- [ ] Windows и Linux: матрица сборки, platform.rs, запуск исполнителей без tmux через PTY (SPEC §13)
+- [ ] Телефон-компаньон, вторая волна: PWA-клиент (адаптивная сборка React в `pwa/`), экран «Доступы → Телефон»
+  с QR и списком устройств на `companion_*` IPC (SPEC §12)
 - [ ] Импорт чатов и проектов из Claude / Codex / Copilot / Cursor / Gemini при первом старте
 - [ ] Несколько аккаунтов GitHub в «Доступах»
 - [ ] Исполнители на локальных моделях Ollama (список уже в экране «Модели», запуск через них — отдельная задача)
@@ -18,6 +17,14 @@
 - [ ] Перевод ошибок ядра (сейчас только по-русски) под язык интерфейса
 
 ## In progress
+- [ ] v0.3 · ядро предпросмотра `preview.rs` (источники url/image/doc/diff, вотчер, asset protocol, CSP) —
+  Codex, ворктри `preview-core`, `docs/TASK-preview-core.md` (26.10.2026)
+- [ ] v0.3 · панель «Результат» во фронте: `Preview.tsx`, режимы веб/картинка/документ/дифф, тянущаяся панель,
+  `⌘\`, кнопка на карточках исполнителей, i18n — Claude, ворктри `preview-ui`, `docs/TASK-preview-ui.md` (26.10.2026)
+- [ ] v0.3 · сервер компаньона `companion.rs`: axum+rustls, mDNS, привязка QR/код, WS-протокол §7, реестр устройств,
+  `companion_*` IPC — Codex, ворктри `companion-core`, `docs/TASK-companion-core.md` (26.10.2026)
+- [ ] v0.3 · платформенный слой `platform.rs`, PTY-раннер без tmux, матрица release/ci для macOS/Windows/Linux —
+  Codex, ворктри `platform`, `docs/TASK-platform.md` (26.10.2026)
 
 ## Review
 
