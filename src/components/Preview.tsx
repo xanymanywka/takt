@@ -375,7 +375,17 @@ const DocView: React.FC<{ source: PreviewSource }> = ({ source }) => {
     return <iframe className="pv-doc-frame" sandbox="" srcDoc={doc} title={source.title} />;
   }
   if (markdownHtml) {
-    return <article className="pv-md" dangerouslySetInnerHTML={{ __html: markdownHtml }} />;
+    // Ссылки не должны уводить окно приложения: внешние — в браузер, остальные гасим
+    const onLinkClick = (e: React.MouseEvent<HTMLElement>) => {
+      const a = (e.target as HTMLElement).closest('a');
+      const href = a?.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+      e.preventDefault();
+      if (/^(https?:|mailto:)/i.test(href)) void open_external(href, true);
+    };
+    return (
+      <article className="pv-md" onClick={onLinkClick} dangerouslySetInnerHTML={{ __html: markdownHtml }} />
+    );
   }
   return <pre className="pv-plain">{text}</pre>;
 };
