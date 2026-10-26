@@ -7,6 +7,7 @@ import {
   TerminalIcon,
   WranglerIcon,
 } from '../components/Icons';
+import { AgentLogo } from '../components/BrandLogos';
 import { SetupSide } from '../components/SetupSide';
 import { useT } from '../i18n';
 import { open_in_terminal, write_instructions } from '../lib/ipc';
@@ -99,13 +100,13 @@ export const Start: React.FC = () => {
                     </div>
                     <div className="who">
                       <i className={agents.claude ? undefined : 'off'} title="Claude">
-                        {t('agent.claudeInitial')}
+                        <AgentLogo agent="claude" size={13} />
                       </i>
                       <i className={agents.codex ? undefined : 'off'} title="Codex">
-                        Cx
+                        <AgentLogo agent="codex" size={13} />
                       </i>
                       <i className={agents.agy ? undefined : 'off'} title="Antigravity">
-                        Ag
+                        <AgentLogo agent="agy" size={13} />
                       </i>
                     </div>
                     <div className={`ok ${host.warn ? 'warn' : ''}`}>
@@ -158,28 +159,38 @@ export const Start: React.FC = () => {
             <div className="rows">
               {tools.map((tool) => {
                 const agents = tool.agents || { claude: true, codex: true, agy: true };
-                const isWarn = tool.warn || !tool.loggedIn;
-                const statusText = tool.statusText || (tool.loggedIn ? t('start.tools.loggedIn') : t('start.tools.loggedOut'));
+                // Вход есть только у claude/codex/gh: у остальных loggedIn не задан, и для них
+                // статус — «установлен», а не «не выполнен вход».
+                const isWarn = !tool.found || tool.warn || tool.loggedIn === false;
+                const statusText = !tool.found
+                  ? t('start.tools.notFound')
+                  : tool.statusText
+                    || (tool.loggedIn === true
+                      ? t('start.tools.loggedIn')
+                      : tool.loggedIn === false
+                        ? t('start.tools.loggedOut')
+                        : t('start.tools.installed'));
+                const detail = tool.account || tool.version || tool.path;
 
                 return (
                   <div key={tool.id} className="row">
                     <span className="ic">{getToolIcon(tool.id)}</span>
                     <div className="nm">
                       {tool.id}
-                      {tool.account && <span>{tool.account}</span>}
+                      {detail && <span>{detail}</span>}
                     </div>
                     <div className="who">
                       <i className={agents.claude ? undefined : 'off'} title="Claude">
-                        {t('agent.claudeInitial')}
+                        <AgentLogo agent="claude" size={13} />
                       </i>
                       <i className={agents.codex ? undefined : 'off'} title="Codex">
-                        Cx
+                        <AgentLogo agent="codex" size={13} />
                       </i>
                       <i className={agents.agy ? undefined : 'off'} title="Antigravity">
-                        Ag
+                        <AgentLogo agent="agy" size={13} />
                       </i>
                     </div>
-                    <div className={`ok ${isWarn ? 'warn' : ''}`}>{statusText}</div>
+                    <div className={`ok ${!tool.found ? 'off' : isWarn ? 'warn' : ''}`}>{statusText}</div>
                   </div>
                 );
               })}
@@ -192,17 +203,8 @@ export const Start: React.FC = () => {
                 names: mcpExtra > 0 ? `${mcpNames} ${t('start.foot.more', { count: mcpExtra })}` : mcpNames,
               })}
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                type="button"
-                className="cta"
-                style={{
-                  background: 'var(--raised)',
-                  color: 'var(--fg)',
-                  boxShadow: 'var(--shadow)',
-                }}
-                onClick={handleOpenTerminal}
-              >
+            <div className="foot-actions">
+              <button type="button" className="cta ghost" onClick={handleOpenTerminal}>
                 <TerminalIcon size={16} />
                 <span>{t('start.foot.openTerminal')}</span>
               </button>

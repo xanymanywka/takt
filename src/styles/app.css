@@ -2315,3 +2315,15 @@ button.row:focus-visible {
   color: var(--muted);
   font-size: 12.5px;
 }
+
+/* «Доступы»: кнопки подвала не наезжают друг на друга и переносятся на узком окне. */
+.foot {
+  flex-wrap: wrap;
+}
+
+.foot-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
