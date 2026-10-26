@@ -14,7 +14,10 @@ use companion::{
     CompanionState, companion_pair_begin, companion_revoke, companion_start, companion_status,
     companion_stop,
 };
-use conductor::{ConductorState, conductor_send, conductor_start, conductor_stop};
+use conductor::{
+    ConductorState, conductor_config, conductor_send, conductor_start, conductor_stop,
+    set_conductor,
+};
 use jobs::{job_kill, job_new, job_run, job_screen, job_send, list_jobs, write_task};
 use limits::limits;
 use models::{list_models, save_model};
@@ -48,6 +51,8 @@ pub fn run() {
             conductor_start,
             conductor_send,
             conductor_stop,
+            conductor_config,
+            set_conductor,
             pty_open,
             pty_write,
             pty_resize,

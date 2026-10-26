@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import {
+  CONDUCTOR_AGENTS,
+  conductor_config,
   conductor_send,
   isTauriEnv,
   job_kill,
@@ -9,7 +11,10 @@ import {
   list_projects,
   listen,
   preview_sources,
+  set_conductor,
   setup_status,
+  type ConductorAgent,
+  type ConductorOption,
   type Job,
   type Limit,
   type PreviewSource,
@@ -60,6 +65,9 @@ interface OrchestraState {
   limits: Limit[];
   messages: ChatMessage[];
   setup: Setup | null;
+  /** Кто дирижирует; читается из ~/.orchestra/conductor.json, по умолчанию Claude. */
+  conductorAgent: ConductorAgent;
+  conductorOptions: ConductorOption[];
   error: string | null;
   update: UpdateInfo | null;
   updateChecksEnabled: boolean;
@@ -81,6 +89,8 @@ interface OrchestraState {
   completeOnboarding: () => void;
   restartOnboarding: () => void;
   refreshSetup: () => Promise<void>;
+  refreshConductor: () => Promise<void>;
+  setConductor: (agent: ConductorAgent) => Promise<void>;
   setTab: (tab: TabType) => void;
   setTheme: (theme: ThemeType) => void;
   toggleTheme: () => void;
@@ -137,11 +147,31 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+const CONDUCTOR_NAMES: Record<ConductorAgent, string> = {
+  claude: 'Claude',
+  codex: 'Codex',
+  agy: 'Antigravity',
+};
+
+/** Короткое имя дирижёра для подписи в чате и партитуре. */
+export function conductorName(agent: ConductorAgent): string {
+  return CONDUCTOR_NAMES[agent];
+}
+
+/** Первый доступный по порядку claude → codex → agy; если никого нет — Claude. */
+export function firstAvailableConductor(options: ConductorOption[]): ConductorAgent {
+  for (const id of CONDUCTOR_AGENTS) {
+    const option = options.find((item) => item.id === id);
+    if (option && option.found && option.loggedIn !== false) return id;
+  }
+  return 'claude';
+}
+
 /** Демо-диалог вне Tauri; текст берётся из словаря текущего языка. */
 function initialMessages(): ChatMessage[] {
   return [
     { id: 'init_user_1', role: 'user', text: t('demo.user'), time: t('chat.justNow') },
-    { id: 'init_assistant_1', role: 'assistant', who: 'Claude', text: t('demo.assistant') },
+    { id: 'init_assistant_1', role: 'assistant', who: conductorName('claude'), text: t('demo.assistant') },
   ];
 }
 
@@ -200,6 +230,8 @@ export const useStore = create<OrchestraState>((set, get) => ({
   limits: [],
   messages: isTauriEnv() ? [] : initialMessages(),
   setup: null,
+  conductorAgent: 'claude',
+  conductorOptions: [],
   error: null,
   update: null,
   updateChecksEnabled: getInitialUpdateChecks(),
@@ -248,6 +280,25 @@ export const useStore = create<OrchestraState>((set, get) => ({
     }
   },
   setActiveWorktree: (activeWorktree: string) => set({ activeWorktree }),
+
+  refreshConductor: async () => {
+    try {
+      const config = await conductor_config();
+      set({ conductorAgent: config.agent, conductorOptions: config.available });
+    } catch (err: unknown) {
+      set({ error: errorMessage(err) });
+    }
+  },
+
+  setConductor: async (agent: ConductorAgent) => {
+    const previous = get().conductorAgent;
+    set({ conductorAgent: agent });
+    try {
+      await set_conductor(agent);
+    } catch (err: unknown) {
+      set({ conductorAgent: previous, error: errorMessage(err) });
+    }
+  },
 
   setTheme: (theme: ThemeType) => {
     if (typeof document !== 'undefined') {
@@ -453,11 +504,12 @@ export const useStore = create<OrchestraState>((set, get) => ({
 
     // 2. Загружаем данные
     try {
-      const [projs, jbs, lmts, stp] = await Promise.all([
+      const [projs, jbs, lmts, stp, conductor] = await Promise.all([
         list_projects(),
         list_jobs(),
         apiLimits(),
         setup_status(),
+        conductor_config(),
       ]);
 
       const active = projs.length > 0 ? projs[0] : null;
@@ -467,6 +519,8 @@ export const useStore = create<OrchestraState>((set, get) => ({
         jobs: jbs,
         limits: lmts,
         setup: stp,
+        conductorAgent: conductor.agent,
+        conductorOptions: conductor.available,
       });
       void get().loadPreviewSources();
     } catch (err: unknown) {
@@ -559,7 +613,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
                     {
                       id: msgId,
                       role: 'assistant',
-                      who: 'Claude',
+                      who: conductorName(state.conductorAgent),
                       text: textBlocks,
                     },
                   ],

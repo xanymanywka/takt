@@ -1,4 +1,6 @@
 import type {
+  ConductorAgent,
+  ConductorConfig,
   Job,
   Limit,
   ModelProviderId,
@@ -345,6 +347,35 @@ export async function conductor_send(projectPath: string, text: string): Promise
 }
 
 export async function conductor_stop(_projectPath: string): Promise<void> {}
+
+const CONDUCTOR_STORAGE_KEY = 'takt-mock-conductor';
+
+function readMockConductor(): ConductorAgent {
+  try {
+    const stored = localStorage.getItem(CONDUCTOR_STORAGE_KEY);
+    if (stored === 'claude' || stored === 'codex' || stored === 'agy') return stored;
+  } catch {}
+  return 'claude';
+}
+
+/** В браузере: Claude и Codex найдены, Antigravity не установлен — чтобы видеть отключённую карточку. */
+export async function conductor_config(): Promise<ConductorConfig> {
+  return {
+    agent: readMockConductor(),
+    available: [
+      { id: 'claude', found: true, loggedIn: true },
+      { id: 'codex', found: true, loggedIn: true },
+      { id: 'agy', found: false },
+    ],
+  };
+}
+
+export async function set_conductor(agent: ConductorAgent): Promise<void> {
+  console.log('[mock set_conductor]', agent);
+  try {
+    localStorage.setItem(CONDUCTOR_STORAGE_KEY, agent);
+  } catch {}
+}
 
 export async function pty_open(_cwd: string, _cols: number, _rows: number): Promise<string> {
   return 'mock-pty-001';

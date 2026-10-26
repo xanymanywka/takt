@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRightIcon, MoonIcon, SunIcon } from '../components/Icons';
+import { ConductorChoice } from '../components/ConductorChoice';
 import { SetupSide } from '../components/SetupSide';
 import { LOCALES, useLocale, useT, type Locale } from '../i18n';
 import { useStore, type ScreenType, type ThemeType } from '../store';
@@ -125,6 +126,13 @@ export const Settings: React.FC = () => {
 
           <div className="grp">
             <h3>{t('settings.agents.title')}</h3>
+            <div className="conductor-pick">
+              <div className="conductor-pick__head">
+                {t('conductor.title')}
+                <span>{t('conductor.appliesNext')}</span>
+              </div>
+              <ConductorChoice compact />
+            </div>
             <div className="rows">
               {link(
                 t('start.nav.access'),

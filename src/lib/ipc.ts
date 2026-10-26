@@ -214,6 +214,34 @@ export async function conductor_stop(projectPath: string): Promise<void> {
   return mock.conductor_stop(projectPath);
 }
 
+/** Кто дирижирует: `claude` — Claude Code, `codex` — Codex CLI, `agy` — Antigravity. */
+export type ConductorAgent = 'claude' | 'codex' | 'agy';
+
+export const CONDUCTOR_AGENTS: ConductorAgent[] = ['claude', 'codex', 'agy'];
+
+export interface ConductorOption {
+  id: ConductorAgent;
+  found: boolean;
+  /** Отсутствует, если проверить вход нельзя. */
+  loggedIn?: boolean;
+}
+
+export interface ConductorConfig {
+  agent: ConductorAgent;
+  available: ConductorOption[];
+}
+
+export async function conductor_config(): Promise<ConductorConfig> {
+  if (isTauriEnv()) return tauriInvoke<ConductorConfig>('conductor_config');
+  return mock.conductor_config();
+}
+
+/** Запоминает выбор; действует для новых разговоров, работающего дирижёра не трогает. */
+export async function set_conductor(agent: ConductorAgent): Promise<void> {
+  if (isTauriEnv()) return tauriInvoke<void>('set_conductor', { agent });
+  return mock.set_conductor(agent);
+}
+
 export async function pty_open(cwd: string, cols: number, rows: number): Promise<string> {
   if (isTauriEnv()) return tauriInvoke<string>('pty_open', { cwd, cols, rows });
   return mock.pty_open(cwd, cols, rows);
