@@ -3,7 +3,7 @@ import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
 import { AgentLogo } from './BrandLogos';
 import { jobStateLabel } from '../lib/labels';
-import { useStore } from '../store';
+import { sourcesForJob, useStore } from '../store';
 
 interface SatelliteProps {
   job: Job;
@@ -14,6 +14,9 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
   const setTab = useStore((state) => state.setTab);
   const setActiveWorktree = useStore((state) => state.setActiveWorktree);
   const sendJobAnswer = useStore((state) => state.sendJobAnswer);
+  const previewSources = useStore((state) => state.previewSources);
+  const openPreview = useStore((state) => state.openPreview);
+  const jobSources = sourcesForJob(job, previewSources);
 
   const [customAnswer, setCustomAnswer] = useState('');
 
@@ -125,6 +128,11 @@ export const Satellite: React.FC<SatelliteProps> = ({ job }) => {
         <button type="button" onClick={() => console.log('diff clicked')}>
           {t('sat.diff')}
         </button>
+        {jobSources.length > 0 && (
+          <button type="button" className="sat-result" onClick={() => openPreview(jobSources[0])}>
+            {t('preview.title')}
+          </button>
+        )}
         <button type="button" onClick={handleOpenTerminal}>
           {t('sat.terminal')}
         </button>

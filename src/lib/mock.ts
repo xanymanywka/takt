@@ -4,6 +4,7 @@ import type {
   ModelProviderId,
   ModelSelection,
   ModelsInfo,
+  PreviewSource,
   Project,
   Setup,
   UnlistenFn,
@@ -430,4 +431,182 @@ export async function save_model(
   if (model) mockSelection[provider] = model;
   else delete mockSelection[provider];
   return { ...mockSelection };
+}
+
+// ---- Предпросмотр результата ----
+const TAKT = '~/orchestra/takt';
+
+function minutesAgo(minutes: number): string {
+  return new Date(Date.now() - minutes * 60_000).toISOString();
+}
+
+/** Мок-пути → URL, которые отдаёт `pnpm dev` (папка docs/ лежит в корне Vite). */
+const MOCK_FILE_URLS: Record<string, string> = {
+  [`${TAKT}/terminal-pane/docs/screenshots/chat.png`]: '/docs/screenshots/chat.png',
+  [`${TAKT}/main/docs/screenshots/chat.png`]: '/docs/screenshots/onboarding-welcome.png',
+  [`${TAKT}/terminal-pane/docs/screenshots/settings.png`]: '/docs/screenshots/settings.png',
+};
+
+const MOCK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" font-family="Montserrat, sans-serif" font-size="14">
+  <rect width="520" height="220" fill="#f4f5f0"/>
+  <g fill="#ffffff" stroke="#0b0d0c" stroke-width="1.5">
+    <rect x="20" y="80" width="130" height="60" rx="10"/>
+    <rect x="195" y="30" width="130" height="60" rx="10"/>
+    <rect x="195" y="130" width="130" height="60" rx="10"/>
+    <rect x="370" y="80" width="130" height="60" rx="10"/>
+  </g>
+  <g stroke="#3f5a00" stroke-width="2" fill="none">
+    <path d="M150 110 L195 60"/><path d="M150 110 L195 160"/>
+    <path d="M325 60 L370 110"/><path d="M325 160 L370 110"/>
+  </g>
+  <g fill="#0b0d0c" text-anchor="middle">
+    <text x="85" y="115">React</text>
+    <text x="260" y="65">ipc.ts</text>
+    <text x="260" y="165">mock.ts</text>
+    <text x="435" y="115">Tauri core</text>
+  </g>
+</svg>`;
+
+const MOCK_TASK_MD = `# TASK: Терминал во вкладке «Код»
+
+## Цель
+Встроить **xterm** в раскладку чата: слева список ворктри, справа PTY-сессия \`zsh -l\`.
+
+## Объём
+- \`src/components/Terminal.tsx\` — обёртка над \`@xterm/xterm\` + \`addon-fit\`
+- события \`pty://data\` и \`pty://exit\`
+- ресайз по \`ResizeObserver\`
+
+| Команда | Что делает |
+|---|---|
+| \`pty_open\` | открывает сессию |
+| \`pty_write\` | пишет ввод |
+
+## Приёмка
+- [x] терминал печатает вывод
+- [ ] ресайз без мерцания
+
+<script>alert('xss')</script>
+<img src=x onerror="alert('xss')">
+`;
+
+const MOCK_HTML = `<!doctype html><html><body style="font-family:system-ui;padding:24px;background:#fff;color:#111">
+<h1>Отчёт CodeRabbit</h1><p>Major: <b>0</b>, minor: <b>2</b>.</p>
+<ul><li>src/store.ts:120 — лишний ререндер</li><li>src/App.tsx:40 — неиспользуемый импорт</li></ul>
+</body></html>`;
+
+// Минимальный валидный PDF с одной строкой текста.
+const MOCK_PDF = `%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 400 200]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
+4 0 obj<</Length 52>>stream
+BT /F1 20 Tf 40 100 Td (Takt preview: PDF) Tj ET
+endstream endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
+trailer<</Root 1 0 R>>
+%%EOF`;
+
+const MOCK_TEXTS: Record<string, string> = {
+  [`${TAKT}/terminal-pane/docs/TASK-ui.md`]: MOCK_TASK_MD,
+  [`${TAKT}/pty-bridge/docs/architecture.svg`]: MOCK_SVG,
+  [`${TAKT}/pty-bridge/coderabbit-report.html`]: MOCK_HTML,
+};
+
+const MOCK_DIFF = `diff --git a/src/App.tsx b/src/App.tsx
+index 3f2c1a0..9b7e4d2 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,9 +1,10 @@
+ import { useEffect } from 'react';
+ import { Lead } from './components/Lead';
++import { Preview } from './components/Preview';
+ import { Sidebar } from './components/Sidebar';
+ import { UpdateBanner } from './components/UpdateBanner';
+ import { About } from './screens/About';
+ import { Chat } from './screens/Chat';
+-import { Code } from './screens/Code';
++import { Code } from './screens/Code';
+ import { Models } from './screens/Models';
+ import { Orchestra } from './screens/Orchestra';
+@@ -40,24 +41,26 @@ function App() {
+   return (
+     <div className="page">
+       <Lead />
+       <UpdateBanner />
+${Array.from({ length: 14 }, (_, i) => `       {/* строка контекста ${i + 1} */}`).join('\n')}
+       {screen === 'chat' && (
+-        <div className="win" id="chat">
++        <div className="win with-preview" id="chat">
+           <Sidebar />
+           {tab === 'chat' && <Chat />}
+           {tab === 'code' && <Code />}
+           {tab === 'orchestra' && <Orchestra />}
++          <Preview />
+         </div>
+       )}
+     </div>
+   );
+ }
+`;
+
+let previewPdfUrl: string | null = null;
+function pdfUrl(): string {
+  if (!previewPdfUrl) {
+    previewPdfUrl = URL.createObjectURL(new Blob([MOCK_PDF], { type: 'application/pdf' }));
+  }
+  return previewPdfUrl;
+}
+
+let currentPreview: PreviewSource[] | null = null;
+function previewList(): PreviewSource[] {
+  currentPreview ??= [
+    { kind: 'url', url: 'http://localhost:1420/', title: 'Vite · :1420', mtime: minutesAgo(1) },
+    { kind: 'image', path: `${TAKT}/terminal-pane/docs/screenshots/chat.png`, title: 'chat.png', mtime: minutesAgo(4) },
+    { kind: 'image', path: `${TAKT}/main/docs/screenshots/chat.png`, title: 'chat.png · main', mtime: minutesAgo(180) },
+    { kind: 'doc', path: `${TAKT}/terminal-pane/docs/TASK-ui.md`, title: 'TASK-ui.md', mtime: minutesAgo(12) },
+    { kind: 'doc', path: `${TAKT}/pty-bridge/docs/architecture.svg`, title: 'architecture.svg', mtime: minutesAgo(25) },
+    { kind: 'doc', path: `${TAKT}/pty-bridge/coderabbit-report.html`, title: 'coderabbit-report.html', mtime: minutesAgo(40) },
+    { kind: 'doc', path: `${TAKT}/pty-bridge/docs/spec.pdf`, title: 'spec.pdf', mtime: minutesAgo(65) },
+    { kind: 'diff', path: `${TAKT}/pty-bridge/src/App.tsx`, title: 'src/App.tsx', mtime: minutesAgo(2) },
+  ];
+  return currentPreview;
+}
+
+let previewTimerStarted = false;
+function ensurePreviewTimer(projectPath: string): void {
+  if (previewTimerStarted || typeof window === 'undefined') return;
+  previewTimerStarted = true;
+  let n = 0;
+  setInterval(() => {
+    n += 1;
+    const list = previewList();
+    list.unshift({
+      kind: 'image',
+      path: `${TAKT}/terminal-pane/docs/screenshots/settings${n === 1 ? '' : `-${n}`}.png`,
+      title: n === 1 ? 'settings.png' : `settings-${n}.png`,
+      mtime: new Date().toISOString(),
+    });
+    emit('preview://changed', { projectPath, sources: JSON.parse(JSON.stringify(list)) });
+  }, 20_000);
+}
+
+export async function preview_sources(projectPath: string): Promise<PreviewSource[]> {
+  ensurePreviewTimer(projectPath);
+  return JSON.parse(JSON.stringify(previewList()));
+}
+
+export async function preview_diff(_path: string, _worktree: string): Promise<string> {
+  return MOCK_DIFF;
+}
+
+export async function preview_read(path: string): Promise<string> {
+  const text = MOCK_TEXTS[path];
+  if (text === undefined) throw new Error(`Файл не найден: ${path}`);
+  return text;
+}
+
+export function preview_file_src(path: string): string {
+  if (path.endsWith('.pdf')) return pdfUrl();
+  return MOCK_FILE_URLS[path.replace(/settings-\d+\.png$/, 'settings.png')] ?? path;
 }
