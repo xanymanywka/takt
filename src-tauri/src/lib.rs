@@ -1,3 +1,4 @@
+mod companion;
 mod conductor;
 mod jobs;
 mod limits;
@@ -7,6 +8,10 @@ mod pty;
 mod setup;
 mod shell;
 
+use companion::{
+    CompanionState, companion_pair_begin, companion_revoke, companion_start, companion_status,
+    companion_stop,
+};
 use conductor::{ConductorState, conductor_send, conductor_start, conductor_stop};
 use jobs::{job_kill, job_new, job_run, job_screen, job_send, list_jobs, write_task};
 use limits::limits;
@@ -17,10 +22,12 @@ use setup::{open_in_terminal, setup_status, write_instructions};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    companion::install_crypto_provider();
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .manage(ConductorState::default())
+        .manage(CompanionState::default())
         .manage(PtyState::default())
         .invoke_handler(tauri::generate_handler![
             list_projects,
@@ -45,6 +52,11 @@ pub fn run() {
             open_in_terminal,
             list_models,
             save_model,
+            companion_status,
+            companion_start,
+            companion_stop,
+            companion_pair_begin,
+            companion_revoke,
         ])
         .setup(|app| {
             #[cfg(desktop)]
@@ -52,6 +64,7 @@ pub fn run() {
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
             jobs::start_watcher(app.handle().clone());
             limits::start_poller(app.handle().clone());
+            companion::auto_start(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())

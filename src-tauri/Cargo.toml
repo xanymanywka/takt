@@ -31,6 +31,20 @@ dirs = "6"
 regex = "1"
 chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
+axum = { version = "0.8", features = ["ws"] }
+axum-server = { version = "0.8", features = ["tls-rustls"] }
+rcgen = "0.13"
+mdns-sd = "0.21"
+sha2 = "0.10"
+rand = "0.9"
+base64 = "0.22"
+futures-util = "0.3"
+rustls-pemfile = "2"
+rustls = { version = "0.23", default-features = false, features = ["aws_lc_rs", "std", "tls12"] }
+
+[dev-dependencies]
+tokio-tungstenite = { version = "0.29", features = ["rustls-tls-webpki-roots"] }
+tokio-rustls = "0.26"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
