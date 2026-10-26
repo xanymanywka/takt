@@ -3,6 +3,7 @@ mod conductor;
 mod jobs;
 mod limits;
 mod models;
+mod platform;
 mod preview;
 mod projects;
 mod pty;

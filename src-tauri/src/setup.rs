@@ -1,12 +1,12 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 use regex::Regex;
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::shell::{quote, run_zsh};
+use crate::platform;
+use crate::shell::{quote, run_shell};
 
 const TOOL_IDS: [&str; 8] = [
     "claude",
@@ -32,6 +32,10 @@ pub struct Tool {
     logged_in: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     account: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    warn: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status_text: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -91,15 +95,15 @@ fn gh_account_from(text: &str) -> Option<String> {
 
 async fn auth_status(id: &str, home: &Path) -> (Option<bool>, Option<String>) {
     match id {
-        "claude" => match run_zsh("claude auth status", None).await {
+        "claude" => match run_shell("claude auth status", None).await {
             Ok(output) => (Some(true), account_from(&output)),
             Err(_) => (Some(home.join(".claude/.credentials.json").is_file()), None),
         },
-        "codex" => match run_zsh("codex login status", None).await {
+        "codex" => match run_shell("codex login status", None).await {
             Ok(output) => (Some(true), account_from(&output)),
             Err(_) => (Some(false), None),
         },
-        "gh" => match run_zsh("gh auth status 2>&1", None).await {
+        "gh" => match run_shell("gh auth status 2>&1", None).await {
             Ok(output) => (Some(true), gh_account_from(&output)),
             Err(_) => (Some(false), None),
         },
@@ -108,7 +112,12 @@ async fn auth_status(id: &str, home: &Path) -> (Option<bool>, Option<String>) {
 }
 
 async fn inspect_tool(id: &str, home: &Path) -> Tool {
-    let path = run_zsh(&format!("command -v {}", quote(id)), None)
+    let lookup = if cfg!(target_os = "windows") {
+        format!("(Get-Command {id} -ErrorAction SilentlyContinue).Source")
+    } else {
+        format!("command -v {}", quote(id))
+    };
+    let path = run_shell(&lookup, None)
         .await
         .ok()
         .and_then(|output| first_line(&output));
@@ -116,10 +125,12 @@ async fn inspect_tool(id: &str, home: &Path) -> Tool {
     let version = if found {
         let version_command = if id == "tmux" {
             "tmux -V".to_owned()
+        } else if cfg!(target_os = "windows") {
+            format!("{id} --version")
         } else {
             format!("{} --version", quote(id))
         };
-        run_zsh(&version_command, None)
+        run_shell(&version_command, None)
             .await
             .ok()
             .and_then(|output| first_line(&output))
@@ -138,6 +149,8 @@ async fn inspect_tool(id: &str, home: &Path) -> Tool {
         version,
         logged_in,
         account,
+        warn: None,
+        status_text: None,
     }
 }
 
@@ -295,7 +308,7 @@ pub async fn setup_status() -> Result<Setup, String> {
     for id in TOOL_IDS {
         tools.push(inspect_tool(id, &home).await);
     }
-    tools.push(agents_tool(&home));
+    tools.push(agents_tool(&home, cfg!(target_os = "windows")));
     let ssh = fs::read_to_string(home.join(".ssh/config"))
         .map(|content| parse_ssh(&content))
         .unwrap_or_default();
@@ -338,21 +351,20 @@ fn write_instructions_at(path: &Path, force: bool) -> Result<(), String> {
 
 /// Дирижёрский скрипт `~/.orchestra/agents.py`: без него задачи исполнителям не уходят.
 /// Это не CLI в PATH, поэтому проверяется отдельно от `TOOL_IDS`, честно, по наличию файла.
-fn agents_tool(home: &Path) -> Tool {
+fn agents_tool(home: &Path, pty_runner: bool) -> Tool {
     let path = home.join(".orchestra/agents.py");
-    let found = path.is_file();
+    let script_exists = path.is_file();
+    let found = pty_runner || script_exists;
     Tool {
         id: "agents".to_owned(),
         found,
-        path: found.then(|| path.display().to_string()),
+        path: script_exists.then(|| path.display().to_string()),
         version: None,
         logged_in: None,
         account: None,
+        warn: pty_runner.then_some(true),
+        status_text: pty_runner.then(|| "Запуск через PTY ядра".to_owned()),
     }
-}
-
-fn applescript_string(value: &str) -> String {
-    format!("\"{}\"", value.replace('\\', "\\\\").replace('"', "\\\""))
 }
 
 /// Белый список команд, которые интерфейс может попросить выполнить в Terminal.app.
@@ -363,8 +375,10 @@ const TERMINAL_ACTIONS: &[(&str, &str)] = &[
     ("install:codex", "npm i -g @openai/codex"),
     ("install:gh", "brew install gh"),
     ("install:codexbar", "brew install codexbar"),
-    ("install:coderabbit", "curl -fsSL https://cli.coderabbit.ai/install.sh | sh"),
-    ("install:tmux", "brew install tmux"),
+    (
+        "install:coderabbit",
+        "curl -fsSL https://cli.coderabbit.ai/install.sh | sh",
+    ),
     ("install:git", "xcode-select --install"),
     ("login:claude", "claude"),
     ("login:codex", "codex login"),
@@ -373,11 +387,25 @@ const TERMINAL_ACTIONS: &[(&str, &str)] = &[
     ("login:coderabbit", "coderabbit auth login"),
 ];
 
-fn terminal_command(action: &str) -> Option<&'static str> {
+fn terminal_command(action: &str) -> Result<&'static str, String> {
+    if action == "install:tmux" {
+        if cfg!(target_os = "windows") {
+            return Err(
+                "На Windows tmux не нужен: исполнители запускаются через встроенный терминал"
+                    .to_owned(),
+            );
+        }
+        return Ok(if cfg!(target_os = "macos") {
+            "brew install tmux"
+        } else {
+            "sudo apt install tmux"
+        });
+    }
     TERMINAL_ACTIONS
         .iter()
         .find(|(key, _)| *key == action)
         .map(|(_, command)| *command)
+        .ok_or_else(|| format!("Неизвестное действие для терминала: {action}"))
 }
 
 #[tauri::command(async)]
@@ -390,30 +418,11 @@ pub fn open_in_terminal(cwd: String, action: Option<String>) -> Result<(), Strin
     if !Path::new(&cwd).is_dir() {
         return Err(format!("Папка не найдена: {cwd}"));
     }
-    let mut shell = format!("cd {}", quote(&cwd));
-    if let Some(action) = action.filter(|action| !action.trim().is_empty()) {
-        let command = terminal_command(action.trim())
-            .ok_or_else(|| format!("Неизвестное действие для терминала: {action}"))?;
-        shell.push_str(" && ");
-        shell.push_str(command);
-    }
-    let script = format!(
-        "tell application \"Terminal\"\nactivate\ndo script {}\nend tell",
-        applescript_string(&shell)
-    );
-    let output = Command::new("osascript")
-        .arg("-e")
-        .arg(script)
-        .output()
-        .map_err(|error| format!("Не удалось открыть Terminal: {error}"))?;
-    if output.status.success() {
-        Ok(())
-    } else {
-        Err(format!(
-            "Terminal вернул ошибку: {}",
-            String::from_utf8_lossy(&output.stderr).trim()
-        ))
-    }
+    let command = action
+        .filter(|action| !action.trim().is_empty())
+        .map(|action| terminal_command(action.trim()))
+        .transpose()?;
+    platform::open_terminal(Path::new(&cwd), command)
 }
 
 #[cfg(test)]
@@ -464,15 +473,28 @@ mod tests {
         let setup = setup_status().await.expect("live setup");
         println!("{}", serde_json::to_string_pretty(&setup).unwrap());
         assert_eq!(setup.tools.len(), TOOL_IDS.len() + 1);
-        assert_eq!(setup.tools.last().map(|tool| tool.id.as_str()), Some("agents"));
+        assert_eq!(
+            setup.tools.last().map(|tool| tool.id.as_str()),
+            Some("agents")
+        );
     }
 
     #[test]
     fn terminal_actions_are_allow_listed() {
-        assert_eq!(terminal_command("install:tmux"), Some("brew install tmux"));
-        assert_eq!(terminal_command("login:codex"), Some("codex login"));
-        assert_eq!(terminal_command("rm -rf /"), None);
-        assert_eq!(terminal_command("install:tmux && rm -rf /"), None);
+        let expected_tmux = if cfg!(target_os = "windows") {
+            Err(
+                "На Windows tmux не нужен: исполнители запускаются через встроенный терминал"
+                    .to_owned(),
+            )
+        } else if cfg!(target_os = "macos") {
+            Ok("brew install tmux")
+        } else {
+            Ok("sudo apt install tmux")
+        };
+        assert_eq!(terminal_command("install:tmux"), expected_tmux);
+        assert_eq!(terminal_command("login:codex"), Ok("codex login"));
+        assert!(terminal_command("rm -rf /").is_err());
+        assert!(terminal_command("install:tmux && rm -rf /").is_err());
     }
 
     #[test]
@@ -484,10 +506,19 @@ mod tests {
     #[test]
     fn agents_tool_reports_missing_script() {
         let dir = std::env::temp_dir().join(format!("takt-agents-{}", std::process::id()));
-        let tool = agents_tool(&dir);
+        let tool = agents_tool(&dir, false);
         assert_eq!(tool.id, "agents");
         assert!(!tool.found);
         assert!(tool.path.is_none());
+    }
+
+    #[test]
+    fn agents_tool_uses_core_pty_on_windows() {
+        let dir = std::env::temp_dir().join(format!("takt-agents-pty-{}", std::process::id()));
+        let tool = agents_tool(&dir, true);
+        assert!(tool.found);
+        assert_eq!(tool.warn, Some(true));
+        assert_eq!(tool.status_text.as_deref(), Some("Запуск через PTY ядра"));
     }
 
     #[test]

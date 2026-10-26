@@ -9,10 +9,26 @@ permissions:
   contents: write
 
 jobs:
-  macos:
-    runs-on: macos-latest
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            tauri-args: --target universal-apple-darwin
+          - platform: windows-latest
+            tauri-args: --bundles msi,nsis
+          - platform: ubuntu-22.04
+            tauri-args: --bundles deb,appimage
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - uses: pnpm/action-setup@v4
         with:
@@ -24,6 +40,10 @@ jobs:
           cache: pnpm
 
       - uses: dtolnay/rust-toolchain@stable
+        if: matrix.platform != 'macos-latest'
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.platform == 'macos-latest'
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
 
@@ -33,7 +53,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Universal .dmg + .app.tar.gz + signature, published to the GitHub Release for this tag.
+      # Installers + updater signatures for every platform go into one GitHub Release for this tag;
+      # tauri-action merges each platform into the shared latest.json.
       # TAURI_SIGNING_PRIVATE_KEY / TAURI_SIGNING_PRIVATE_KEY_PASSWORD come from repository secrets
       # (generated once with `pnpm tauri signer generate`). The public key lives in tauri.conf.json.
       - uses: tauri-apps/tauri-action@v0
@@ -42,10 +63,10 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          args: --target universal-apple-darwin
+          args: ${{ matrix.tauri-args }}
           tagName: ${{ github.ref_name }}
           releaseName: "Takt ${{ github.ref_name }}"
-          releaseBody: "Download `Takt_*_universal.dmg`. The app will offer the next update itself."
+          releaseBody: "Download the installer for your platform. Takt will offer future updates automatically."
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

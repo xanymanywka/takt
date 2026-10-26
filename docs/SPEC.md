@@ -120,7 +120,11 @@ export interface Job {
   steps: Step[]; lastLine: string; model?: string;
 }
 export interface Limit { provider: 'claude' | 'codex' | 'antigravity'; sessionLeft?: number; weeklyLeft?: number; resetsIn?: string; raw: string }
-export interface Tool { id: 'claude'|'codex'|'agy'|'gh'|'codexbar'|'coderabbit'|'tmux'|'git'; found: boolean; path?: string; version?: string; loggedIn?: boolean; account?: string }
+export interface Tool {
+  id: 'claude'|'codex'|'agy'|'gh'|'codexbar'|'coderabbit'|'tmux'|'git'|'agents';
+  found: boolean; path?: string; version?: string; loggedIn?: boolean; account?: string;
+  warn?: boolean; statusText?: string; // agents на Windows: found, warn, «Запуск через PTY ядра»
+}
 export interface SshHost { host: string; hostname?: string; user?: string; port?: number; identityFile?: string }
 export interface McpServer { name: string; source: 'codex' | 'agy'; command?: string; url?: string }
 export interface Setup { instructionsExists: boolean; projectsExists: boolean; tools: Tool[]; ssh: SshHost[]; mcp: McpServer[] }
@@ -129,9 +133,9 @@ export interface Setup { instructionsExists: boolean; projectsExists: boolean; t
 list_projects(): Project[]
 save_projects(projects: Project[]): void
 list_jobs(): Job[]                                  // jobs.json + шаги + последняя строка
-job_screen(name: string, lines?: number): string    // agents tail
-job_send(name: string, text: string): void          // agents send
-job_kill(name: string): void
+job_screen(name: string, lines?: number): string    // agents tail; runner "pty" — буфер ядра
+job_send(name: string, text: string): void          // agents send; runner "pty" — запись в PTY + \r
+job_kill(name: string): void                        // runner "pty" — kill процесса и удаление из jobs.json
 job_new(repo: string, name: string): string         // agents new → путь ворктри
 job_run(agent: AgentKind, worktree: string, taskFile: string, name?: string): Job
 write_task(worktree: string, slug: string, markdown: string): string // docs/TASK-<slug>.md → путь
@@ -145,7 +149,7 @@ pty_open(cwd: string, cols: number, rows: number): string  // id
 pty_write(id: string, data: string): void
 pty_resize(id: string, cols: number, rows: number): void
 pty_close(id: string): void
-open_in_terminal(cwd: string, command?: string): void // Terminal.app через osascript
+open_in_terminal(cwd: string, command?: string): void // Terminal.app / Windows Terminal / x-terminal-emulator (§13)
 
 // ---- события (tauri listen) ----
 'jobs://changed'           payload: Job[]           // при изменении jobs.json или экрана
@@ -249,10 +253,23 @@ KANBAN.md
 
 - Матрица сборки в `release.yml`: `macos-latest` (universal), `windows-latest` (`.msi`, `.exe`
   NSIS), `ubuntu-22.04` (`.deb`, `.AppImage`). Updater читает один `latest.json` со всеми платформами.
-- Абстракции платформы в `src-tauri/src/platform.rs`: оболочка (`zsh -l` / `pwsh` / `bash -l`),
-  путь к домашней папке и `~/.orchestra`, открытие внешнего терминала (Terminal.app /
-  Windows Terminal / `x-terminal-emulator`), tmux → на Windows нет: исполнители запускаются
-  напрямую через PTY `portable-pty` (ядро уже умеет), экран хранится в приложении.
+- Абстракции платформы в `src-tauri/src/platform.rs`: оболочка (`zsh -lc` / `pwsh -NoProfile -Command`
+  с фолбэком `powershell` / `$SHELL -lc`, иначе `bash -lc`), PATH инструментов (`tool_path`),
+  `~/.orchestra` (`orchestra_home`), внешний терминал (`open_terminal`: Terminal.app через osascript /
+  `wt.exe` с фолбэком `cmd /c start pwsh` / `x-terminal-emulator` → `gnome-terminal` → `konsole` → `xterm`),
+  `has_tmux` и `python` (`python3` / `python`). `shell::run_shell` работает поверх этих функций
+  и по-прежнему вычищает `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_SMALL_FAST_MODEL`.
+- Исполнители без tmux (и всегда на Windows): `job_run` запускает их напрямую через `portable-pty`
+  с теми же командами, что в §3 (cwd = ворктри, PATH = `tool_path`, PTY 220×50), и пишет в
+  `~/.orchestra/jobs.json` запись в формате `agents.py` (`agent`, `worktree`, `task`, `startedAt`,
+  `state`, `model?`) с полем `"runner": "pty"`. Записи без `runner` — tmux, обслуживаются `agents.py`
+  как раньше. Экран PTY-задачи — кольцевой буфер 2000 строк в памяти ядра без ANSI
+  (`job_screen`), `job_send` пишет текст + `\r` в PTY, `job_kill` убивает процесс и убирает запись.
+  Завершение процесса переводит `state` в `exited`. После перезапуска приложения экран PTY-задач
+  прошлой сессии недоступен — их можно только снять через `job_kill`.
+- `setup_status` на Windows: инструмент `agents` отдаётся `found: true, warn: true,
+  statusText: "Запуск через PTY ядра"`; действие `install:tmux` возвращает ошибку
+  «На Windows tmux не нужен…», на Linux это `sudo apt install tmux`, на macOS `brew install tmux`.
 - Шрифты вшиты в бандл (Montserrat, Newsreader), не Google Fonts, чтобы работало офлайн везде.
 - Проверять на реальных машинах/VM до релиза; агенты-исполнители (claude/codex/agy) должны
   быть установлены пользователем на той платформе — экран «Старт» это показывает.

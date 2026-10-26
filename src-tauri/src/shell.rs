@@ -4,6 +4,8 @@ use std::time::Duration;
 
 use tokio::process::Command;
 
+use crate::platform;
+
 const ANTHROPIC_ENV: [&str; 3] = [
     "ANTHROPIC_BASE_URL",
     "ANTHROPIC_AUTH_TOKEN",
@@ -12,7 +14,7 @@ const ANTHROPIC_ENV: [&str; 3] = [
 
 #[derive(Debug, thiserror::Error)]
 enum ShellError {
-    #[error("Не удалось запустить zsh: {0}")]
+    #[error("Не удалось запустить оболочку: {0}")]
     Spawn(#[from] std::io::Error),
     #[error("Команда завершилась с ошибкой: {0}")]
     Failed(String),
@@ -20,18 +22,30 @@ enum ShellError {
     Timeout,
 }
 
-pub async fn run_zsh(cmd: &str, cwd: Option<&Path>) -> Result<String, String> {
-    run_zsh_inner(cmd, cwd)
+pub async fn run_shell(cmd: &str, cwd: Option<&Path>) -> Result<String, String> {
+    run_shell_inner(cmd, cwd)
         .await
         .map_err(|error| error.to_string())
 }
 
-async fn run_zsh_inner(cmd: &str, cwd: Option<&Path>) -> Result<String, ShellError> {
-    let path = tool_path();
+/// Прежнее имя: его ещё зовут `limits.rs` и `models.rs` (правят соседние исполнители).
+/// Поведение то же, что у `run_shell`; удалить, когда вызовов не останется.
+pub async fn run_zsh(cmd: &str, cwd: Option<&Path>) -> Result<String, String> {
+    run_shell(cmd, cwd).await
+}
 
-    let mut command = Command::new("zsh");
+/// Совместимость для `conductor.rs`; источник правды — `platform::tool_path`.
+pub fn tool_path() -> String {
+    platform::tool_path()
+}
+
+async fn run_shell_inner(cmd: &str, cwd: Option<&Path>) -> Result<String, ShellError> {
+    let path = platform::tool_path();
+    let (program, args_prefix) = platform::login_shell();
+
+    let mut command = Command::new(program);
     command
-        .arg("-lc")
+        .args(args_prefix)
         .arg(cmd)
         .env("PATH", path)
         .stdin(Stdio::null())
@@ -61,16 +75,6 @@ async fn run_zsh_inner(cmd: &str, cwd: Option<&Path>) -> Result<String, ShellErr
             stderr
         }))
     }
-}
-
-pub fn tool_path() -> String {
-    let home = dirs::home_dir().unwrap_or_default();
-    let inherited_path = std::env::var("PATH").unwrap_or_default();
-    format!(
-        "{}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:{}",
-        home.join(".local/bin").display(),
-        inherited_path
-    )
 }
 
 pub fn quote(value: &str) -> String {
