@@ -1,8 +1,9 @@
 # Takt — архитектура v0.1
 
-Десктоп-приложение для дирижирования агентами: пользователь говорит с главным агентом
-(Claude Code) как в чате, а под сообщением видит «спутники» — карточки исполнителей
-(Codex, Antigravity/agy, Claude), которых дирижёр запустил, с честным прогрессом по шагам.
+Десктоп-приложение для дирижирования агентами: пользователь говорит с главным агентом —
+дирижёром, которым по выбору становится Claude Code, Codex CLI или Antigravity, — как в чате,
+а под сообщением видит «спутники» — карточки исполнителей (Codex, Antigravity/agy, Claude),
+которых дирижёр запустил, с честным прогрессом по шагам.
 
 Заменяет Emdash / Nimbalyst / Conductor / Vibe Kanban (все отклонены 23.10.2026).
 Дизайн утверждён: `docs/design/orchestra-hand.html` (открыть в браузере), токены — `docs/DESIGN.md`.
@@ -36,23 +37,46 @@ PATH начинается с `~/.local/bin:/opt/homebrew/bin`.
 
 ## 3. Дирижёр
 
-Главный агент — процесс `claude` в режиме потокового JSON:
+Дирижёр — ваш основной агент: Claude Code, Codex или Antigravity. Выбор хранится в
+`~/.orchestra/conductor.json` (`{ "agent": "claude" | "codex" | "agy" }`); нет файла — дирижирует
+Claude ровно так, как до появления выбора. Выбор применяется при следующем `conductor_start`,
+работающий дирижёр не трогается.
+
+**Claude** — процесс `claude` в режиме потокового JSON (флаги не менялись, `ANTHROPIC_*` снимаются):
 
 ```
 claude --dangerously-skip-permissions -p --verbose \
   --output-format stream-json --input-format stream-json \
-  [--resume <session_id>]
+  [--resume <session_id>] [--append-system-prompt-file ~/.orchestra/INSTRUCTIONS.md]
 ```
 
-- cwd = выбранный проект. Процесс живёт, пока открыт чат проекта; новые реплики пишутся
+**Codex** — на каждое сообщение отдельный процесс, промпт через stdin:
+
+```
+codex exec [resume <thread_id>] --json --dangerously-bypass-approvals-and-sandbox \
+  --skip-git-repo-check [-C <project>] [-c developer_instructions="<INSTRUCTIONS.md>"] -
+```
+
+Между ходами дирижёр «жив» как сохранённый `thread_id`; `conductor://exit` уходит только после
+стопа пользователем. JSONL Codex ядро переводит в формат Claude: `thread.started` → `system/init`,
+`agent_message` → `assistant` текст (один `message.id` на item), `command_execution`/`file_change`
+→ `assistant` `tool_use` (`Bash`/`Edit`), `turn.completed` → `result`, `error` → `stderr`.
+
+**Antigravity** — `agy -p --output-format stream-json --input-format stream-json
+--dangerously-skip-permissions [--conversation <id>]`; формат совпадает с Claude, у `agy` нет флага
+системного промпта, поэтому `INSTRUCTIONS.md` уходит в начало первого сообщения нового разговора.
+
+- cwd = выбранный проект. Потоковый процесс живёт, пока открыт чат проекта; новые реплики пишутся
   в stdin строкой `{"type":"user","message":{"role":"user","content":"…"}}`.
-- Каждая строка stdout — JSON-событие; Rust пробрасывает его как есть во фронт
-  (`conductor://event`) и дополнительно хранит `session_id` в `~/.orchestra/sessions.json`
-  (`{ "<projectPath>": "<session_id>" }`) для `--resume`.
+- Каждая строка stdout — JSON-событие в формате Claude stream-json; Rust пробрасывает его во фронт
+  (`conductor://event`) и хранит сессию в `~/.orchestra/sessions.json`
+  (`{ "<projectPath>": { "agent": "codex", "id": "…" } }`; старый формат `{ "<projectPath>": "<id>" }`
+  читается как сессия Claude).
 - Фронт рендерит: `assistant` → текст (шрифт голоса, Newsreader), `tool_use` → одна тихая
-  строка «читает файл…/запускает…», `result` → конец хода.
-- Дирижёр узнаёт правила из `~/.orchestra/INSTRUCTIONS.md` (см. §5): приложение передаёт его
-  через `--append-system-prompt-file ~/.orchestra/INSTRUCTIONS.md`.
+  строка «читает файл…/запускает…», `result` → конец хода. Парсер один для всех дирижёров.
+- Дирижёр узнаёт правила из `~/.orchestra/INSTRUCTIONS.md` (см. §5).
+- Ошибки входа ядро заменяет подсказкой: «Нужен вход: выполните `claude` / `codex login` / `agy`
+  в терминале».
 
 ## 4. Честный прогресс («партитура»)
 
@@ -141,6 +165,8 @@ write_instructions(): string                        // создаёт ~/.orchest
 conductor_start(projectPath: string): { sessionId?: string }
 conductor_send(projectPath: string, text: string): void
 conductor_stop(projectPath: string): void
+conductor_config(): { agent: 'claude'|'codex'|'agy'; available: { id: 'claude'|'codex'|'agy'; found: boolean; loggedIn?: boolean }[] }
+set_conductor(agent: 'claude'|'codex'|'agy'): void   // пишет ~/.orchestra/conductor.json, действует с нового conductor_start
 pty_open(cwd: string, cols: number, rows: number): string  // id
 pty_write(id: string, data: string): void
 pty_resize(id: string, cols: number, rows: number): void

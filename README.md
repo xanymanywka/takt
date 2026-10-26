@@ -19,7 +19,7 @@
 ## English
 
 **Takt** replaces Emdash, Conductor, Vibe Kanban and similar boards with one idea: you talk to a single
-conductor agent (Claude Code), and it hands tasks to executors — Codex, Antigravity, Claude.
+conductor agent — your choice of Claude Code, Codex CLI or Antigravity — and it hands tasks to executors — Codex, Antigravity, Claude.
 Every task lives in its own git worktree; every executor gets a card with honest progress:
 checked acceptance items from `TASK-<slug>.md`, never a made-up percentage.
 
@@ -91,7 +91,7 @@ commercial products. Contact the author for commercial use.
 ## Українська
 
 **Takt** замінює Emdash, Conductor, Vibe Kanban і подібні панелі однією ідеєю: ви розмовляєте
-з головним агентом (Claude Code, «диригент»), а він роздає задачі виконавцям — Codex, Antigravity, Claude.
+з головним агентом — «диригентом», яким на ваш вибір стає Claude Code, Codex CLI або Antigravity, — а він роздає задачі виконавцям — Codex, Antigravity, Claude.
 Кожна задача живе у своїй git-ворктрі, у кожного виконавця своя картка з чесним прогресом:
 відмічені пункти приймання з `TASK-<slug>.md`, а не вигадані відсотки.
 
@@ -164,7 +164,7 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 ## Русский
 
 **Takt** заменяет Emdash, Conductor, Vibe Kanban и подобные панели одной идеей: вы разговариваете
-с главным агентом (Claude Code, «дирижёр»), а он раздаёт задачи исполнителям — Codex, Antigravity, Claude.
+с главным агентом — «дирижёром», которым на ваш выбор становится Claude Code, Codex CLI или Antigravity, — а он раздаёт задачи исполнителям — Codex, Antigravity, Claude.
 Каждая задача живёт в своей git-ворктри, у каждого исполнителя своя карточка с реальным прогрессом:
 отмеченные пункты приёмки из `TASK-<slug>.md`, а не выдуманные проценты.
 

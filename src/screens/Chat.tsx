@@ -1,16 +1,18 @@
 import React from 'react';
-import { ClaudeLogo } from '../components/BrandLogos';
+import { AgentLogo } from '../components/BrandLogos';
 import { PanelIcon } from '../components/Icons';
 import { Composer } from '../components/Composer';
 import { Score } from '../components/Score';
 import { Satellite } from '../components/Satellite';
 import { Tabs } from '../components/Tabs';
 import { useT } from '../i18n';
-import { useStore } from '../store';
+import { conductorName, useStore } from '../store';
 
 export const Chat: React.FC = () => {
   const t = useT();
   const activeProject = useStore((state) => state.activeProject);
+  const conductorAgent = useStore((state) => state.conductorAgent);
+  const conductor = conductorName(conductorAgent);
   const messages = useStore((state) => state.messages);
   const jobs = useStore((state) => state.jobs);
   const previewOpen = useStore((state) => state.previewOpen);
@@ -87,12 +89,12 @@ export const Chat: React.FC = () => {
               return (
                 <React.Fragment key={msg.id}>
                   <div className="voice">
-                    <div className="mono" title="Claude" aria-label={t('agent.claudeInitial')}>
-                      <ClaudeLogo size={16} />
+                    <div className="mono" title={conductor} aria-label={conductor}>
+                      <AgentLogo agent={conductorAgent} size={16} />
                     </div>
                     <div>
                       <div className="who">
-                        <b>Claude</b> {t('chat.conducts')}
+                        <b>{conductor}</b> {t('chat.conducts')}
                       </div>
                       <p>{msg.text}</p>
                       {isLastAssistant && <Score />}

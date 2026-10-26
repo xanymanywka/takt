@@ -1,13 +1,21 @@
 import React from 'react';
 import { useT } from '../i18n';
 import type { Job } from '../lib/ipc';
-import { sourcesForJob, useStore } from '../store';
+import { conductorName, sourcesForJob, useStore } from '../store';
 import { PanelIcon } from './Icons';
-import { AgentLogo, ClaudeLogo } from './BrandLogos';
+import { AgentLogo } from './BrandLogos';
+import type { ConductorAgent } from '../lib/ipc';
+
+const CONDUCTOR_COLOR: Record<ConductorAgent, string> = {
+  claude: 'var(--acc)',
+  codex: 'var(--codex)',
+  agy: 'var(--agy)',
+};
 
 export const Score: React.FC = () => {
   const t = useT();
   const jobs = useStore((state) => state.jobs);
+  const conductorAgent = useStore((state) => state.conductorAgent);
   const previewSources = useStore((state) => state.previewSources);
   const openPreview = useStore((state) => state.openPreview);
 
@@ -46,13 +54,13 @@ export const Score: React.FC = () => {
         <span>{t('score.meta', { steps: totalSteps, minutes: 4 })}</span>
       </header>
 
-      {/* Строка дирижёра Claude */}
-      <div className="stave me-row" style={{ '--c': 'var(--acc)' } as React.CSSProperties}>
+      {/* Строка дирижёра — выбранный агент */}
+      <div className="stave me-row" style={{ '--c': CONDUCTOR_COLOR[conductorAgent] } as React.CSSProperties}>
         <div className="nm">
           <span className="lg">
-            <ClaudeLogo size={13} />
+            <AgentLogo agent={conductorAgent} size={13} />
           </span>
-          Claude
+          {conductorName(conductorAgent)}
         </div>
         <div className="bars">
           <i className="done" />

@@ -12,13 +12,15 @@ import {
   SunIcon,
   TerminalIcon,
 } from '../components/Icons';
+import { AgentLogo } from '../components/BrandLogos';
+import { ConductorChoice, conductorReady } from '../components/ConductorChoice';
 import { LOCALES, useLocale, useT, type Locale } from '../i18n';
 import { open_in_terminal, write_instructions, type Tool } from '../lib/ipc';
-import { useStore, type ThemeType } from '../store';
+import { conductorName, firstAvailableConductor, useStore, type ThemeType } from '../store';
 
-type StepId = 'welcome' | 'tools' | 'projects' | 'access' | 'instructions' | 'done';
+type StepId = 'welcome' | 'tools' | 'conductor' | 'projects' | 'access' | 'instructions' | 'done';
 
-const STEPS: StepId[] = ['welcome', 'tools', 'projects', 'access', 'instructions', 'done'];
+const STEPS: StepId[] = ['welcome', 'tools', 'conductor', 'projects', 'access', 'instructions', 'done'];
 
 /** Команда входа для каждого инструмента; пользователь выполняет её сам в терминале. */
 const LOGIN_COMMAND: Partial<Record<Tool['id'], string>> = {
@@ -50,6 +52,9 @@ export const Onboarding: React.FC = () => {
   const refreshSetup = useStore((state) => state.refreshSetup);
   const setupRefreshing = useStore((state) => state.setupRefreshing);
   const completeOnboarding = useStore((state) => state.completeOnboarding);
+  const conductorAgent = useStore((state) => state.conductorAgent);
+  const conductorOptions = useStore((state) => state.conductorOptions);
+  const setConductor = useStore((state) => state.setConductor);
 
   const [index, setIndex] = useState(0);
   const [instructionsCreated, setInstructionsCreated] = useState(false);
@@ -60,6 +65,17 @@ export const Onboarding: React.FC = () => {
   useEffect(() => {
     if (step === 'tools' || step === 'instructions') void refreshSetup();
   }, [step, refreshSetup]);
+
+  // На шаге дирижёра: если текущий выбор недоступен, берём первого доступного (claude → codex → agy).
+  useEffect(() => {
+    if (step !== 'conductor' || conductorOptions.length === 0) return;
+    const current = conductorOptions.find((option) => option.id === conductorAgent);
+    if (conductorReady(current)) return;
+    const fallback = firstAvailableConductor(conductorOptions);
+    if (fallback !== conductorAgent && conductorReady(conductorOptions.find((option) => option.id === fallback))) {
+      void setConductor(fallback);
+    }
+  }, [step, conductorOptions, conductorAgent, setConductor]);
 
   const tools = setup?.tools ?? [];
   const sshHosts = setup?.ssh ?? [];
@@ -231,6 +247,23 @@ export const Onboarding: React.FC = () => {
           </div>
         );
 
+      case 'conductor':
+        return (
+          <div className="wiz-step" key="conductor">
+            <h2>{t('onb.conductor.title')}</h2>
+            <p className="sub">
+              {t('onb.conductor.sub1')} <i>{t('onb.conductor.sub2')}</i> {t('onb.conductor.sub3')}
+            </p>
+            <div className="grp">
+              <h3>
+                {t('conductor.title')} <span>{t('conductor.appliesNext')}</span>
+              </h3>
+              <ConductorChoice />
+            </div>
+            <p className="about-text">{t('onb.conductor.note')}</p>
+          </div>
+        );
+
       case 'projects':
         return (
           <div className="wiz-step" key="projects">
@@ -385,6 +418,15 @@ export const Onboarding: React.FC = () => {
                         ? t('onb.tools.empty')
                         : t('onb.done.toolsHint', { total: tools.length, ready: tools.length - loggedOut.length - missing.length })}
                     </span>
+                  </div>
+                </div>
+                <div className="row">
+                  <span className="ic">
+                    <AgentLogo agent={conductorAgent} size={14} />
+                  </span>
+                  <div className="nm">
+                    {t('conductor.title')}
+                    <span>{conductorName(conductorAgent)}</span>
                   </div>
                 </div>
                 <div className="row">
