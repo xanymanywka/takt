@@ -7,21 +7,15 @@ import {
   TerminalIcon,
   WranglerIcon,
 } from '../components/Icons';
-import { SetupNav } from '../components/SetupNav';
-import { LOCALES, useLocale, useT, type Locale } from '../i18n';
+import { SetupSide } from '../components/SetupSide';
+import { useT } from '../i18n';
 import { open_in_terminal, write_instructions } from '../lib/ipc';
 import { useStore } from '../store';
 
 export const Start: React.FC = () => {
   const t = useT();
-  const locale = useLocale();
-  const setLocale = useStore((state) => state.setLocale);
   const setup = useStore((state) => state.setup);
-  const updateChecksEnabled = useStore((state) => state.updateChecksEnabled);
-  const updateCheckStatus = useStore((state) => state.updateCheckStatus);
-  const updateCheckMessage = useStore((state) => state.updateCheckMessage);
-  const checkUpdate = useStore((state) => state.checkUpdate);
-  const setUpdateChecks = useStore((state) => state.setUpdateChecks);
+  const refreshSetup = useStore((state) => state.refreshSetup);
 
   const [openSshRows, setOpenSshRows] = useState<Record<string, boolean>>({});
 
@@ -38,6 +32,7 @@ export const Start: React.FC = () => {
     try {
       await write_instructions();
       setInstructionsCreated(true);
+      void refreshSetup();
     } catch (err) {
       console.error(err);
     }
@@ -66,26 +61,7 @@ export const Start: React.FC = () => {
 
   return (
     <div className="win" id="start">
-      <aside className="side">
-        <div className="lights">
-          <i />
-          <i />
-          <i />
-        </div>
-
-        <SetupNav current="access" />
-
-        <div className="limits">
-          <h3>{t('start.step', { step: 5, total: 8 })}</h3>
-          <div className="lim">
-            <span>{t('start.setup')}</span>
-            <b>{t('start.eta', { minutes: 6 })}</b>
-            <span className="t">
-              <i style={{ width: '56%' }} />
-            </span>
-          </div>
-        </div>
-      </aside>
+      <SetupSide current="access" />
 
       <main className="main">
         <section className="start">
@@ -210,64 +186,6 @@ export const Start: React.FC = () => {
             </div>
           </div>
 
-          <div className="grp update-settings">
-            <h3>
-              {t('start.updates.title')} <span>{t('start.updates.channel')}</span>
-            </h3>
-            <div className="update-settings__row">
-              <label className="update-settings__toggle">
-                <input
-                  type="checkbox"
-                  checked={updateChecksEnabled}
-                  onChange={(event) => setUpdateChecks(event.target.checked)}
-                />
-                <span className="update-settings__track" aria-hidden="true">
-                  <span />
-                </span>
-                <span>{t('start.updates.onLaunch')}</span>
-              </label>
-              <button
-                type="button"
-                className="update-settings__check"
-                disabled={updateCheckStatus === 'checking'}
-                onClick={() => void checkUpdate(true)}
-              >
-                {updateCheckStatus === 'checking' ? t('start.updates.checking') : t('start.updates.checkNow')}
-              </button>
-            </div>
-            {updateCheckMessage ? (
-              <p
-                className={`update-settings__status ${
-                  updateCheckStatus === 'error' ? 'is-error' : ''
-                }`}
-                role="status"
-                aria-live="polite"
-              >
-                {updateCheckMessage}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="grp language-settings">
-            <h3>
-              {t('start.language.title')} <span>{t('start.language.sub')}</span>
-            </h3>
-            <div className="lang-row" role="radiogroup" aria-label={t('start.language.title')}>
-              {LOCALES.map((code: Locale) => (
-                <button
-                  key={code}
-                  type="button"
-                  role="radio"
-                  aria-checked={locale === code}
-                  className={`lang-btn ${locale === code ? 'is-active' : ''}`}
-                  onClick={() => setLocale(code)}
-                >
-                  {t(`locale.${code}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="foot">
             <div className="n">
               {t('start.foot.mcp', {
@@ -293,7 +211,9 @@ export const Start: React.FC = () => {
                 className="cta"
                 onClick={handleCreateInstructions}
               >
-                {instructionsCreated ? t('start.foot.created') : t('start.foot.next')}
+                {instructionsCreated || setup?.instructionsExists
+                  ? t('start.foot.created')
+                  : t('start.foot.next')}
                 <span>
                   <ArrowRightIcon />
                 </span>

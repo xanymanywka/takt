@@ -1,65 +1,71 @@
 import React from 'react';
 import { ArrowRightIcon, CheckIcon, CircleTodoIcon, DotIcon } from './Icons';
 import { useT } from '../i18n';
-import { useStore } from '../store';
+import { useStore, type ScreenType } from '../store';
 
-export type SetupStep = 'access' | 'models';
+export type SetupStep = 'access' | 'models' | 'settings' | 'about';
 
 interface SetupNavProps {
   current: SetupStep;
 }
 
-/** Левая колонка онбординга: пройденные, текущий и будущие шаги + «О программе». */
+type ItemState = 'done' | 'now' | 'todo';
+
+/**
+ * Левая колонка экранов настройки. Состояния реальные: «Доступы» и «Модели» считаются
+ * готовыми, когда данные загружены; «Инструкции» — когда есть ~/.orchestra/INSTRUCTIONS.md.
+ */
 export const SetupNav: React.FC<SetupNavProps> = ({ current }) => {
   const t = useT();
   const setScreen = useStore((state) => state.setScreen);
+  const setup = useStore((state) => state.setup);
+  const projects = useStore((state) => state.projects);
 
-  const stepItem = (label: string, state: 'done' | 'now' | 'todo') => (
-    <li aria-current={state === 'now' ? 'true' : undefined} className={state === 'todo' ? 'off' : undefined}>
-      <span className={`k ${state === 'now' ? 'now' : state === 'todo' ? 'todo' : ''}`}>
-        {state === 'done' && <CheckIcon />}
-        {state === 'now' && <DotIcon />}
-        {state === 'todo' && <CircleTodoIcon />}
-      </span>
-      {label}
-    </li>
+  const tools = setup?.tools ?? [];
+  const toolsReady = tools.length > 0 && tools.every((tool) => tool.found && tool.loggedIn !== false);
+  const sshReady = (setup?.ssh?.length ?? 0) > 0;
+  const instructionsReady = Boolean(setup?.instructionsExists);
+  const projectsReady = projects.length > 0;
+
+  const icon = (state: ItemState) => (
+    <span className={`k ${state === 'now' ? 'now' : state === 'todo' ? 'todo' : ''}`}>
+      {state === 'done' && <CheckIcon />}
+      {state === 'now' && <DotIcon />}
+      {state === 'todo' && <CircleTodoIcon />}
+    </span>
   );
 
-  const linkItem = (label: string, screen: SetupStep, state: 'done' | 'now' | 'todo') => (
-    <li aria-current={state === 'now' ? 'true' : undefined} className={state === 'todo' ? 'off' : undefined}>
+  const item = (label: string, state: ItemState, screen: ScreenType, isCurrent: boolean) => (
+    <li aria-current={isCurrent ? 'true' : undefined} className={state === 'todo' ? 'off' : undefined}>
       <button
         type="button"
         className="setnav-link"
-        aria-current={state === 'now' ? 'page' : undefined}
-        onClick={() => setScreen(screen === 'access' ? 'start' : 'models')}
+        aria-current={isCurrent ? 'page' : undefined}
+        onClick={() => setScreen(screen)}
       >
-        <span className={`k ${state === 'now' ? 'now' : state === 'todo' ? 'todo' : ''}`}>
-          {state === 'done' && <CheckIcon />}
-          {state === 'now' && <DotIcon />}
-          {state === 'todo' && <CircleTodoIcon />}
-        </span>
+        {icon(isCurrent ? 'now' : state)}
         {label}
       </button>
     </li>
   );
 
-  const accessState = current === 'access' ? 'now' : 'done';
-  const modelsState = current === 'models' ? 'now' : 'todo';
-
   return (
     <div className="proj">
       <h3>{t('start.nav.title')}</h3>
       <ul className="setnav">
-        {stepItem(t('start.nav.conductor'), 'done')}
-        {stepItem(t('start.nav.workers'), 'done')}
-        {stepItem(t('start.nav.import'), 'done')}
-        {stepItem(t('start.nav.github'), 'done')}
-        {linkItem(t('start.nav.access'), 'access', accessState)}
-        {stepItem(t('start.nav.instructions'), 'todo')}
-        {linkItem(t('start.nav.models'), 'models', modelsState)}
-        {stepItem(t('start.nav.skills'), 'todo')}
-        <li className="about-nav">
-          <button type="button" className="setnav-link" onClick={() => setScreen('about')}>
+        {item(t('start.nav.workers'), toolsReady ? 'done' : 'todo', 'start', current === 'access')}
+        {item(t('start.nav.projects'), projectsReady ? 'done' : 'todo', 'start', false)}
+        {item(t('start.nav.access'), sshReady ? 'done' : 'todo', 'start', current === 'access')}
+        {item(t('start.nav.instructions'), instructionsReady ? 'done' : 'todo', 'start', false)}
+        {item(t('start.nav.models'), 'done', 'models', current === 'models')}
+        {item(t('start.nav.settings'), 'done', 'settings', current === 'settings')}
+        <li className="about-nav" aria-current={current === 'about' ? 'true' : undefined}>
+          <button
+            type="button"
+            className="setnav-link"
+            aria-current={current === 'about' ? 'page' : undefined}
+            onClick={() => setScreen('about')}
+          >
             <span className="k">
               <ArrowRightIcon />
             </span>

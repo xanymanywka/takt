@@ -49,11 +49,10 @@ svg {
 
 /* ---------- page container ---------- */
 .page {
-  max-width: 1240px;
   width: 100%;
   height: 100vh;
-  margin: 0 auto;
-  padding: 16px 16px 20px;
+  margin: 0;
+  padding: 14px 18px 18px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -278,7 +277,7 @@ svg {
   min-height: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: clamp(220px, 16vw, 300px) 1fr;
   grid-template-rows: minmax(0, 1fr);
   border-radius: 18px;
   overflow: hidden;
@@ -301,32 +300,6 @@ svg {
   gap: 18px;
   background: linear-gradient(180deg, rgba(var(--ink), .035), rgba(var(--ink), .015));
   border-right: 1px solid var(--hair);
-}
-
-.lights {
-  display: flex;
-  gap: 8px;
-  padding: 2px 6px 0;
-}
-
-.lights i {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--lights);
-  box-shadow: 0 0 0 .5px rgba(0, 0, 0, calc(.4 * var(--k))) inset;
-}
-
-.lights i:nth-child(1) {
-  background: #e5604f;
-}
-
-.lights i:nth-child(2) {
-  background: #e2b24a;
-}
-
-.lights i:nth-child(3) {
-  background: #5fc460;
 }
 
 .proj h3 {
@@ -550,11 +523,11 @@ svg {
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--hair2) transparent;
-  padding: 18px 22px 16px;
+  padding: 18px clamp(22px, 4vw, 72px) 16px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  max-width: 860px;
+  max-width: 1180px;
   width: 100%;
   margin: 0 auto;
 }
@@ -1234,10 +1207,245 @@ svg {
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--hair2) transparent;
-  padding: 30px 48px 24px;
-  max-width: 900px;
+  padding: 30px clamp(32px, 5vw, 96px) 24px;
+  max-width: 1120px;
   width: 100%;
   margin: 0 auto;
+}
+
+/* ---------- settings ---------- */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px 28px;
+  align-items: start;
+}
+
+.settings-grid .grp {
+  margin-top: 18px;
+}
+
+.choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.choice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--fg2);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: transform .16s var(--ease), color .16s var(--ease), background .16s var(--ease);
+}
+
+.choice-btn:hover {
+  color: var(--fg);
+}
+
+.choice-btn:active {
+  transform: scale(.97);
+}
+
+.choice-btn.is-active {
+  color: var(--fg);
+  background: var(--acc-dim);
+  box-shadow: 0 0 0 1.5px var(--acc) inset;
+}
+
+.row.link {
+  grid-template-columns: 1fr auto;
+  cursor: pointer;
+  text-align: left;
+}
+
+.row.link .about-arrow {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.row.danger .nm {
+  color: var(--fg2);
+}
+
+/* ---------- onboarding wizard ---------- */
+.wiz {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wiz .start {
+  flex: 1;
+  padding-bottom: 12px;
+}
+
+.wiz-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px clamp(32px, 5vw, 96px) 22px;
+  border-top: 1px solid var(--hair);
+  background: linear-gradient(180deg, transparent, rgba(var(--ink), .02));
+}
+
+.wiz-foot .n {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.wiz-foot .acts {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.wiz-step {
+  animation: rise .22s var(--ease) both;
+}
+
+.wiz-hero {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 22px;
+  align-items: center;
+  margin: 8px 0 26px;
+}
+
+.wiz-hero .about-mark {
+  width: 72px;
+  height: 72px;
+  font-size: 40px;
+}
+
+.wiz-hero p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--fg2);
+  max-width: 62ch;
+  line-height: 1.5;
+}
+
+.wiz-progress {
+  margin-top: 8px;
+}
+
+/* Призрачные и тихие CTA: текст лежит в <span>, поэтому базовый круг .cta span здесь снимаем. */
+.cta.ghost,
+.cta.quiet {
+  padding: 8px 16px;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.cta.ghost span,
+.cta.quiet span {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  display: inline;
+  transition: none;
+}
+
+.cta.ghost:hover span,
+.cta.quiet:hover span {
+  transform: none;
+}
+
+.cta.ghost {
+  background: var(--raised);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+}
+
+.cta.ghost:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.cta.quiet {
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.cta.quiet:hover {
+  color: var(--fg);
+}
+
+/* Строка инструмента с командой и действием: пять колонок вместо четырёх. */
+.row:has(.cmd) {
+  grid-template-columns: 22px 1fr auto auto auto;
+}
+
+.row .cmd {
+  font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 12.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(var(--ink), .06);
+  color: var(--fg2);
+  white-space: nowrap;
+}
+
+.row .ok.good {
+  color: var(--ok);
+}
+
+.row .ok.off {
+  color: var(--muted);
+}
+
+.row .act {
+  margin-left: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--acc2);
+  background: var(--acc-dim);
+  white-space: nowrap;
+  transition: transform .16s var(--ease);
+}
+
+.row .act:active {
+  transform: scale(.97);
+}
+
+.lead .gear {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--fg2);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+  transition: transform .16s var(--ease), color .16s var(--ease);
+}
+
+.lead .gear:hover {
+  color: var(--fg);
+}
+
+.lead .gear:active {
+  transform: scale(.95);
+}
+
+.lead .gear[aria-current="page"] {
+  color: var(--acc2);
+  box-shadow: 0 0 0 1.5px var(--acc) inset;
 }
 
 .start h2 {

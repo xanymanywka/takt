@@ -295,6 +295,7 @@ pub async fn setup_status() -> Result<Setup, String> {
     for id in TOOL_IDS {
         tools.push(inspect_tool(id, &home).await);
     }
+    tools.push(agents_tool(&home));
     let ssh = fs::read_to_string(home.join(".ssh/config"))
         .map(|content| parse_ssh(&content))
         .unwrap_or_default();
@@ -335,19 +336,66 @@ fn write_instructions_at(path: &Path, force: bool) -> Result<(), String> {
     Ok(())
 }
 
+/// Дирижёрский скрипт `~/.orchestra/agents.py`: без него задачи исполнителям не уходят.
+/// Это не CLI в PATH, поэтому проверяется отдельно от `TOOL_IDS`, честно, по наличию файла.
+fn agents_tool(home: &Path) -> Tool {
+    let path = home.join(".orchestra/agents.py");
+    let found = path.is_file();
+    Tool {
+        id: "agents".to_owned(),
+        found,
+        path: found.then(|| path.display().to_string()),
+        version: None,
+        logged_in: None,
+        account: None,
+    }
+}
+
 fn applescript_string(value: &str) -> String {
     format!("\"{}\"", value.replace('\\', "\\\\").replace('"', "\\\""))
 }
 
+/// Белый список команд, которые интерфейс может попросить выполнить в Terminal.app.
+/// Фронт передаёт только ключ вида `install:tmux` или `login:codex`; произвольные строки
+/// в терминал не попадают.
+const TERMINAL_ACTIONS: &[(&str, &str)] = &[
+    ("install:claude", "npm i -g @anthropic-ai/claude-code"),
+    ("install:codex", "npm i -g @openai/codex"),
+    ("install:gh", "brew install gh"),
+    ("install:codexbar", "brew install codexbar"),
+    ("install:coderabbit", "curl -fsSL https://cli.coderabbit.ai/install.sh | sh"),
+    ("install:tmux", "brew install tmux"),
+    ("install:git", "xcode-select --install"),
+    ("login:claude", "claude"),
+    ("login:codex", "codex login"),
+    ("login:agy", "agy login"),
+    ("login:gh", "gh auth login"),
+    ("login:coderabbit", "coderabbit auth login"),
+];
+
+fn terminal_command(action: &str) -> Option<&'static str> {
+    TERMINAL_ACTIONS
+        .iter()
+        .find(|(key, _)| *key == action)
+        .map(|(_, command)| *command)
+}
+
 #[tauri::command(async)]
-pub fn open_in_terminal(cwd: String, command: Option<String>) -> Result<(), String> {
+pub fn open_in_terminal(cwd: String, action: Option<String>) -> Result<(), String> {
+    let cwd = if cwd == "~" {
+        home()?.display().to_string()
+    } else {
+        cwd
+    };
     if !Path::new(&cwd).is_dir() {
         return Err(format!("Папка не найдена: {cwd}"));
     }
     let mut shell = format!("cd {}", quote(&cwd));
-    if let Some(command) = command.filter(|command| !command.trim().is_empty()) {
+    if let Some(action) = action.filter(|action| !action.trim().is_empty()) {
+        let command = terminal_command(action.trim())
+            .ok_or_else(|| format!("Неизвестное действие для терминала: {action}"))?;
         shell.push_str(" && ");
-        shell.push_str(&command);
+        shell.push_str(command);
     }
     let script = format!(
         "tell application \"Terminal\"\nactivate\ndo script {}\nend tell",
@@ -415,7 +463,31 @@ mod tests {
     async fn live_setup_snapshot() {
         let setup = setup_status().await.expect("live setup");
         println!("{}", serde_json::to_string_pretty(&setup).unwrap());
-        assert_eq!(setup.tools.len(), TOOL_IDS.len());
+        assert_eq!(setup.tools.len(), TOOL_IDS.len() + 1);
+        assert_eq!(setup.tools.last().map(|tool| tool.id.as_str()), Some("agents"));
+    }
+
+    #[test]
+    fn terminal_actions_are_allow_listed() {
+        assert_eq!(terminal_command("install:tmux"), Some("brew install tmux"));
+        assert_eq!(terminal_command("login:codex"), Some("codex login"));
+        assert_eq!(terminal_command("rm -rf /"), None);
+        assert_eq!(terminal_command("install:tmux && rm -rf /"), None);
+    }
+
+    #[test]
+    fn open_in_terminal_rejects_unknown_action() {
+        let error = open_in_terminal("~".to_owned(), Some("echo pwned".to_owned())).unwrap_err();
+        assert!(error.contains("Неизвестное действие"));
+    }
+
+    #[test]
+    fn agents_tool_reports_missing_script() {
+        let dir = std::env::temp_dir().join(format!("takt-agents-{}", std::process::id()));
+        let tool = agents_tool(&dir);
+        assert_eq!(tool.id, "agents");
+        assert!(!tool.found);
+        assert!(tool.path.is_none());
     }
 
     #[test]

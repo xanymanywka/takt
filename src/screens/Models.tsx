@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ArrowRightIcon, CheckIcon } from '../components/Icons';
-import { SetupNav } from '../components/SetupNav';
+import { SetupSide } from '../components/SetupSide';
 import { useT } from '../i18n';
 import {
   list_models,
@@ -77,26 +77,7 @@ export const Models: React.FC = () => {
 
   return (
     <div className="win" id="models">
-      <aside className="side">
-        <div className="lights">
-          <i />
-          <i />
-          <i />
-        </div>
-
-        <SetupNav current="models" />
-
-        <div className="limits">
-          <h3>{t('start.step', { step: 7, total: 8 })}</h3>
-          <div className="lim">
-            <span>{t('start.setup')}</span>
-            <b>{t('start.eta', { minutes: 2 })}</b>
-            <span className="t">
-              <i style={{ width: '82%' }} />
-            </span>
-          </div>
-        </div>
-      </aside>
+      <SetupSide current="models" />
 
       <main className="main">
         <section className="start models">

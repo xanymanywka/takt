@@ -30,12 +30,6 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="side">
-      <div className="lights">
-        <i />
-        <i />
-        <i />
-      </div>
-
       <div className="proj">
         <h3>{t('side.projects')}</h3>
         <ul>

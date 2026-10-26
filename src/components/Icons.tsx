@@ -199,3 +199,36 @@ export const TerminalIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
     <path d="m5 6 2 2-2 2M9 10h2" />
   </svg>
 );
+
+export const GearIcon: React.FC<IconProps> = ({ size = 16, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="8" cy="8" r="2.3" />
+    <path d="M8 1.8v1.7M8 12.5v1.7M1.8 8h1.7M12.5 8h1.7M3.6 3.6l1.2 1.2M11.2 11.2l1.2 1.2M3.6 12.4l1.2-1.2M11.2 4.8l1.2-1.2" />
+  </svg>
+);
+
+export const ArrowLeftIcon: React.FC<IconProps> = ({ size = 14, ...props }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 14 14"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M11 7H3M6.5 3.5 3 7l3.5 3.5" />
+  </svg>
+);

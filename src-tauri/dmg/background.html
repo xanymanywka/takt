@@ -1,0 +1,139 @@
+<!doctype html>
+<!--
+  Фон окна установки DMG. Рендерится в src-tauri/dmg/background.png (2x = 1320x800, метка 144 dpi,
+  иначе Finder покажет картинку 1:1 по пикселям) скриптом scripts/dmg-background.mjs.
+  Координаты иконок задаются в tauri.conf.json:
+  appPosition {180,150}, applicationFolderPosition {480,150}, окно 660x400.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: 'Montserrat';
+    font-weight: 100 900;
+    src: url('../../node_modules/@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Newsreader';
+    font-weight: 200 800;
+    font-style: italic;
+    src: url('../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-standard-italic.woff2') format('woff2');
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 660px;
+    height: 400px;
+    overflow: hidden;
+    background: #080808;
+    font-family: 'Montserrat', sans-serif;
+    color: #f2f2ee;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+  .glow {
+    position: absolute;
+    left: 50%;
+    top: 170px;
+    width: 520px;
+    height: 220px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center, rgba(200, 255, 0, .10), rgba(200, 255, 0, 0) 70%);
+  }
+  .brand {
+    position: absolute;
+    left: 36px;
+    top: 30px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .brand .name {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .brand .tag {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: #a6a69e;
+  }
+  .ver {
+    position: absolute;
+    right: 36px;
+    top: 36px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: #C8FF00;
+  }
+  /* Иконки Finder рисует сам: 128px, центры в (180,170) и (480,170). Между ними стрелка. */
+  .arrow {
+    position: absolute;
+    left: 268px;
+    top: 138px;
+    width: 124px;
+    height: 24px;
+  }
+  .cap {
+    position: absolute;
+    top: 252px;
+    width: 200px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #a6a69e;
+  }
+  .cap.app { left: 80px; }
+  .cap.fold { left: 380px; }
+  .cap span {
+    display: block;
+    margin-top: 3px;
+    font-weight: 500;
+    font-size: 12.5px;
+    color: #8f8f88;
+  }
+  .foot {
+    position: absolute;
+    left: 36px;
+    right: 36px;
+    /* Finder вычитает из 400px высоты окна ~63px заголовка и панели: всё важное держим выше 330px. */
+    bottom: 76px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: #76766f;
+    font-weight: 500;
+  }
+  .foot b { color: #a6a69e; font-weight: 600; }
+  .line {
+    position: absolute;
+    left: 36px;
+    right: 36px;
+    bottom: 104px;
+    height: 1px;
+    background: rgba(255, 255, 255, .08);
+  }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="brand"><span class="name">Takt</span><span class="tag">A score, not a dashboard.</span></div>
+  <div class="ver">macOS · APPLE SILICON</div>
+
+  <svg class="arrow" viewBox="0 0 124 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 12 H108" stroke="#C8FF00" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9" />
+    <path d="M100 3 L116 12 L100 21" stroke="#C8FF00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+
+  <div class="cap app">drag the icon</div>
+  <div class="cap fold">drop it here</div>
+
+  <div class="line"></div>
+  <div class="foot">
+    <span>First launch: <b>right-click → Open</b> (the build is not notarized)</span>
+    <span>github.com/xanymanywka/takt</span>
+  </div>
+</body>
+</html>

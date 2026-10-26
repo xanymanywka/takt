@@ -44,7 +44,7 @@ export interface Limit {
 }
 
 export interface Tool {
-  id: 'claude' | 'codex' | 'agy' | 'gh' | 'codexbar' | 'coderabbit' | 'tmux' | 'git';
+  id: 'claude' | 'codex' | 'agy' | 'gh' | 'codexbar' | 'coderabbit' | 'tmux' | 'git' | 'agents';
   found: boolean;
   path?: string;
   version?: string;
@@ -223,9 +223,10 @@ export async function pty_close(id: string): Promise<void> {
   return mock.pty_close(id);
 }
 
-export async function open_in_terminal(cwd: string, command?: string): Promise<void> {
-  if (isTauriEnv()) return tauriInvoke<void>('open_in_terminal', { cwd, command });
-  return mock.open_in_terminal(cwd, command);
+/** `action` — ключ из белого списка ядра (`install:tmux`, `login:codex`), не произвольная команда. */
+export async function open_in_terminal(cwd: string, action?: string): Promise<void> {
+  if (isTauriEnv()) return tauriInvoke<void>('open_in_terminal', { cwd, action });
+  return mock.open_in_terminal(cwd, action);
 }
 
 export async function list_models(): Promise<ModelsInfo> {

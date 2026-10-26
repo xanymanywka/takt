@@ -104,6 +104,7 @@ export const MOCK_SETUP: Setup = {
       warn: true,
       agents: { claude: true, codex: false, agy: false },
     },
+    { id: 'agents', found: true, path: '~/.orchestra/agents.py' },
   ],
   ssh: [
     {
@@ -357,8 +358,8 @@ export async function pty_resize(_id: string, _cols: number, _rows: number): Pro
 
 export async function pty_close(_id: string): Promise<void> {}
 
-export async function open_in_terminal(cwd: string, command?: string): Promise<void> {
-  console.log('[mock open_in_terminal]', cwd, command);
+export async function open_in_terminal(cwd: string, action?: string): Promise<void> {
+  console.log('[mock open_in_terminal]', cwd, action);
 }
 
 // ---- Модели ----

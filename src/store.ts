@@ -22,13 +22,14 @@ import {
 } from './lib/updater';
 import { getLocale, setLocale as applyLocale, t, type Locale } from './i18n';
 
-export type ScreenType = 'chat' | 'start' | 'about' | 'models';
+export type ScreenType = 'chat' | 'start' | 'about' | 'models' | 'settings' | 'onboarding';
 export type TabType = 'chat' | 'code' | 'orchestra';
 export type ThemeType = 'light' | 'dark';
 export type UpdateCheckStatus = 'idle' | 'checking' | 'current' | 'available' | 'error';
 
 const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 const UPDATE_CHECKS_STORAGE_KEY = 'takt-update-checks';
+const ONBOARDED_STORAGE_KEY = 'takt-onboarded';
 
 let dismissedUpdateVersion: string | null = null;
 
@@ -59,8 +60,13 @@ interface OrchestraState {
   updateError: string | null;
   updateCheckStatus: UpdateCheckStatus;
   updateCheckMessage: string | null;
+  onboarded: boolean;
+  setupRefreshing: boolean;
 
   setScreen: (screen: ScreenType) => void;
+  completeOnboarding: () => void;
+  restartOnboarding: () => void;
+  refreshSetup: () => Promise<void>;
   setTab: (tab: TabType) => void;
   setTheme: (theme: ThemeType) => void;
   toggleTheme: () => void;
@@ -98,6 +104,16 @@ function getInitialUpdateChecks(): boolean {
   }
 }
 
+/** Мастер первого запуска показан один раз; флаг живёт в localStorage WebView. */
+function getInitialOnboarded(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return localStorage.getItem(ONBOARDED_STORAGE_KEY) === 'true';
+  } catch {
+    return true;
+  }
+}
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -110,8 +126,12 @@ function initialMessages(): ChatMessage[] {
   ];
 }
 
+const initialOnboarded = getInitialOnboarded();
+
 export const useStore = create<OrchestraState>((set, get) => ({
-  screen: 'chat',
+  screen: initialOnboarded ? 'chat' : 'onboarding',
+  onboarded: initialOnboarded,
+  setupRefreshing: false,
   tab: 'chat',
   theme: getInitialTheme(),
   locale: getLocale(),
@@ -132,6 +152,37 @@ export const useStore = create<OrchestraState>((set, get) => ({
 
   setScreen: (screen: ScreenType) => set({ screen }),
   setTab: (tab: TabType) => set({ tab }),
+
+  completeOnboarding: () => {
+    try {
+      localStorage.setItem(ONBOARDED_STORAGE_KEY, 'true');
+    } catch {}
+    set({ onboarded: true, screen: 'chat', tab: 'chat' });
+  },
+
+  restartOnboarding: () => {
+    try {
+      localStorage.removeItem(ONBOARDED_STORAGE_KEY);
+    } catch {}
+    set({ onboarded: false, screen: 'onboarding' });
+  },
+
+  refreshSetup: async () => {
+    if (get().setupRefreshing) return;
+    set({ setupRefreshing: true });
+    try {
+      const [setup, projects] = await Promise.all([setup_status(), list_projects()]);
+      set((state) => ({
+        setup,
+        projects,
+        activeProject: state.activeProject ?? (projects.length > 0 ? projects[0] : null),
+      }));
+    } catch (err: unknown) {
+      set({ error: errorMessage(err) });
+    } finally {
+      set({ setupRefreshing: false });
+    }
+  },
   setActiveWorktree: (activeWorktree: string) => set({ activeWorktree }),
 
   setTheme: (theme: ThemeType) => {

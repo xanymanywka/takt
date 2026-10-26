@@ -116,11 +116,21 @@ fn agents_command(args: &[String]) -> Result<String, String> {
     Ok(parts.join(" "))
 }
 
+/// Заголовок раздела приёмки в ТЗ: исполнители пишут на русском, украинском или английском.
+fn is_acceptance_header(line: &str) -> bool {
+    let header = line.trim().trim_start_matches('#').trim().to_lowercase();
+    line.trim_start().starts_with("## ")
+        && matches!(
+            header.as_str(),
+            "приёмка" | "приемка" | "приймання" | "acceptance" | "acceptance criteria"
+        )
+}
+
 fn parse_steps(markdown: &str) -> Vec<Step> {
     let mut in_acceptance = false;
     let mut steps = Vec::new();
     for line in markdown.lines() {
-        if line.trim() == "## Приёмка" {
+        if is_acceptance_header(line) {
             in_acceptance = true;
             continue;
         }
@@ -414,6 +424,19 @@ mod tests {
         assert_eq!(steps.len(), 2);
         assert!(!steps[0].done);
         assert_eq!(steps[0].text, "Первый шаг с продолжением");
+        assert!(steps[1].done);
+    }
+
+    #[test]
+    fn acceptance_header_is_multilingual() {
+        assert!(is_acceptance_header("## Приёмка"));
+        assert!(is_acceptance_header("## Приймання"));
+        assert!(is_acceptance_header("## Acceptance"));
+        assert!(is_acceptance_header("##  acceptance criteria "));
+        assert!(!is_acceptance_header("### Приёмка"));
+        assert!(!is_acceptance_header("## Правила"));
+        let steps = parse_steps("## Acceptance\n- [ ] tsc passes\n- [x] tests pass\n## Notes\n- [ ] out");
+        assert_eq!(steps.len(), 2);
         assert!(steps[1].done);
     }
 

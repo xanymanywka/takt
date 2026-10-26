@@ -40,6 +40,16 @@ checked acceptance items from `TASK-<slug>.md`, never a made-up percentage.
 
 Full spec: [`docs/SPEC.md`](docs/SPEC.md) (Russian). Design system: [`docs/DESIGN.md`](docs/DESIGN.md).
 
+### Screenshots
+
+| Chat with the conductor | Settings |
+| --- | --- |
+| ![Chat: the conductor splits a task between Codex and Antigravity, the score shows progress](docs/screenshots/chat.png) | ![Settings: language, theme, updates, access, models](docs/screenshots/settings.png) |
+
+| First-run wizard | Terminal tools check | DMG installer |
+| --- | --- | --- |
+| ![Wizard, step 1: language and theme](docs/screenshots/onboarding-welcome.png) | ![Wizard, step 2: which CLIs are installed and signed in](docs/screenshots/onboarding-tools.png) | ![DMG window: drag Takt into Applications](docs/screenshots/dmg.png) |
+
 ### Install
 
 One line in Terminal (macOS):
@@ -50,8 +60,9 @@ curl -fsSL https://raw.githubusercontent.com/xanymanywka/takt/main/scripts/insta
 
 It downloads the latest release into `/Applications` and launches it. No Gatekeeper warning: the build is not
 notarized by Apple, and Safari/Finder would quarantine a `.dmg`, but `curl` does not. Later versions arrive through
-the built-in updater. The first-start wizard checks `claude`, `codex`, `agy`, `tmux`, `codexbar` and offers to
-install what is missing.
+the built-in updater. The first-start wizard checks `claude`, `codex`, `agy`, `gh`, `tmux`, `codexbar`, `coderabbit`,
+`git` and `~/.orchestra/agents.py`. It installs nothing itself: for a missing tool it shows the install command and
+can open Terminal with it, and you sign in to every CLI yourself. Takt never types passwords or tokens.
 
 Prefer the `.dmg` from [Releases](https://github.com/xanymanywka/takt/releases/latest)? macOS will block the first
 launch; clear the flag once with `xattr -dr com.apple.quarantine /Applications/Takt.app`.
@@ -101,6 +112,16 @@ commercial products. Contact the author for commercial use.
 
 Докладно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
 
+### Скріншоти
+
+| Чат із диригентом | Налаштування |
+| --- | --- |
+| ![Чат: диригент ділить задачу між Codex і Antigravity, партитура показує поступ](docs/screenshots/chat.png) | ![Налаштування: мова, тема, оновлення, доступи, моделі](docs/screenshots/settings.png) |
+
+| Майстер першого запуску | Перевірка інструментів | Вікно DMG |
+| --- | --- | --- |
+| ![Майстер, крок 1: мова і тема](docs/screenshots/onboarding-welcome.png) | ![Майстер, крок 2: які CLI встановлені та авторизовані](docs/screenshots/onboarding-tools.png) | ![Вікно DMG: перетягніть Takt у Applications](docs/screenshots/dmg.png) |
+
 ### Встановлення
 
 Один рядок у Терміналі (macOS):
@@ -111,8 +132,10 @@ curl -fsSL https://raw.githubusercontent.com/xanymanywka/takt/main/scripts/insta
 
 Скрипт завантажує останній реліз у `/Applications` і запускає його. Попередження Gatekeeper не буде: збірка не
 нотаризована Apple, і Safari/Finder поставили б карантин на `.dmg`, а `curl` цього не робить. Наступні версії
-приходять через вбудоване оновлення. Майстер першого старту перевірить `claude`, `codex`, `agy`, `tmux`, `codexbar`
-і запропонує поставити те, чого бракує.
+приходять через вбудоване оновлення. Майстер першого старту перевіряє `claude`, `codex`, `agy`, `gh`, `tmux`,
+`codexbar`, `coderabbit`, `git` і `~/.orchestra/agents.py`. Сам він нічого не встановлює: для відсутнього
+інструмента показує команду і може відкрити з нею Terminal, а входите в кожен CLI ви самі. Takt ніколи не вводить
+паролі й токени.
 
 Хочете `.dmg` з [Releases](https://github.com/xanymanywka/takt/releases/latest)? macOS заблокує перший запуск;
 зніміть прапорець один раз: `xattr -dr com.apple.quarantine /Applications/Takt.app`.
@@ -162,6 +185,16 @@ pnpm tauri build  # .app і .dmg у src-tauri/target/release/bundle
 
 Подробно: [`docs/SPEC.md`](docs/SPEC.md). Дизайн-система: [`docs/DESIGN.md`](docs/DESIGN.md).
 
+### Скриншоты
+
+| Чат с дирижёром | Настройки |
+| --- | --- |
+| ![Чат: дирижёр делит задачу между Codex и Antigravity, партитура показывает прогресс](docs/screenshots/chat.png) | ![Настройки: язык, тема, обновления, доступы, модели](docs/screenshots/settings.png) |
+
+| Мастер первого запуска | Проверка инструментов | Окно DMG |
+| --- | --- | --- |
+| ![Мастер, шаг 1: язык и тема](docs/screenshots/onboarding-welcome.png) | ![Мастер, шаг 2: какие CLI установлены и авторизованы](docs/screenshots/onboarding-tools.png) | ![Окно DMG: перетащите Takt в Applications](docs/screenshots/dmg.png) |
+
 ### Установка
 
 Одна строка в Терминале (macOS):
@@ -172,8 +205,10 @@ curl -fsSL https://raw.githubusercontent.com/xanymanywka/takt/main/scripts/insta
 
 Скрипт скачивает последний релиз в `/Applications` и запускает его. Предупреждения Gatekeeper не будет: сборка не
 нотаризована Apple, и Safari/Finder поставили бы карантин на `.dmg`, а `curl` этого не делает. Следующие версии
-приходят через встроенное обновление. Мастер первого старта проверит `claude`, `codex`, `agy`, `tmux`, `codexbar`
-и предложит поставить недостающее.
+приходят через встроенное обновление. Мастер первого старта проверяет `claude`, `codex`, `agy`, `gh`, `tmux`,
+`codexbar`, `coderabbit`, `git` и `~/.orchestra/agents.py`. Сам он ничего не ставит: для отсутствующего инструмента
+показывает команду и может открыть с ней Terminal, а входите в каждый CLI вы сами. Takt никогда не вводит пароли
+и токены.
 
 Нужен `.dmg` из [Releases](https://github.com/xanymanywka/takt/releases/latest)? macOS заблокирует первый запуск;
 снимите флаг один раз: `xattr -dr com.apple.quarantine /Applications/Takt.app`.
