@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  check:
-    runs-on: macos-latest
+  frontend:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -23,12 +23,6 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
       - run: pnpm install --frozen-lockfile
 
       - name: Types
@@ -36,6 +30,27 @@ jobs:
 
       - name: i18n keys
         run: node scripts/check-i18n.mjs
+
+  rust:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, windows-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
 
       - name: Rust tests
         working-directory: src-tauri

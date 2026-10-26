@@ -7,6 +7,8 @@ use portable_pty::{Child, CommandBuilder, MasterPty, PtySize, native_pty_system}
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 
+use crate::platform;
+
 struct PtyProcess {
     master: Box<dyn MasterPty + Send>,
     writer: Arc<Mutex<Box<dyn Write + Send>>>,
@@ -39,7 +41,7 @@ fn size(cols: u16, rows: u16) -> PtySize {
     }
 }
 
-fn decode_available(pending: &mut Vec<u8>, eof: bool) -> String {
+pub(crate) fn decode_available(pending: &mut Vec<u8>, eof: bool) -> String {
     let mut decoded = String::new();
     loop {
         match std::str::from_utf8(pending) {
@@ -87,9 +89,14 @@ pub fn pty_open(
     let pair = native_pty_system()
         .openpty(size(cols, rows))
         .map_err(|error| format!("Не удалось открыть PTY: {error}"))?;
-    let mut command = CommandBuilder::new("zsh");
-    command.arg("-l");
+    let (program, args) = platform::interactive_shell();
+    let mut command = CommandBuilder::new(program);
+    command.args(args);
     command.cwd(&cwd);
+    // На unix PATH собирает login-оболочка из профиля; на Windows профиля нет.
+    if cfg!(target_os = "windows") {
+        command.env("PATH", platform::tool_path());
+    }
     command.env("TERM", "xterm-256color");
     command.env("COLORTERM", "truecolor");
     command.env_remove("ANTHROPIC_BASE_URL");
@@ -98,7 +105,7 @@ pub fn pty_open(
     let child = pair
         .slave
         .spawn_command(command)
-        .map_err(|error| format!("Не удалось запустить zsh: {error}"))?;
+        .map_err(|error| format!("Не удалось запустить оболочку: {error}"))?;
     drop(pair.slave);
     let mut reader = pair
         .master
@@ -245,16 +252,17 @@ mod tests {
     use std::time::Duration;
 
     #[test]
-    #[ignore = "запускает реальный zsh -l с профилем пользователя"]
-    fn live_zsh_pty_emits_prompt_and_pwd() {
+    #[ignore = "запускает реальную login-оболочку с профилем пользователя"]
+    fn live_shell_pty_emits_prompt_and_pwd() {
         let cwd = Path::new(env!("CARGO_MANIFEST_DIR"))
             .parent()
             .unwrap()
             .canonicalize()
             .unwrap();
         let pair = native_pty_system().openpty(size(100, 30)).unwrap();
-        let mut command = CommandBuilder::new("zsh");
-        command.arg("-l");
+        let (program, args) = platform::interactive_shell();
+        let mut command = CommandBuilder::new(program);
+        command.args(args);
         command.cwd(&cwd);
         let mut child = pair.slave.spawn_command(command).unwrap();
         drop(pair.slave);

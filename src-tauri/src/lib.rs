@@ -2,6 +2,7 @@ mod conductor;
 mod jobs;
 mod limits;
 mod models;
+mod platform;
 mod projects;
 mod pty;
 mod setup;
