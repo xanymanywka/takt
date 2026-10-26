@@ -2,6 +2,27 @@
 
 All notable changes to Takt. Dates are release dates; versions follow the app bundle.
 
+## 0.3.0 — 2026-10-26
+
+### Added
+- Result panel in the chat (`⌘\`): web preview of a local dev server with phone / tablet / desktop frames,
+  images with zoom and before/after compare, Markdown / HTML / SVG documents, coloured unified diff of files
+  changed by an executor. Sources are discovered by the core: listening localhost ports, fresh images and
+  documents in the project and its worktrees, `git status` of every worktree; a watcher pushes updates live.
+- Selectable conductor: Claude Code, Codex CLI or Antigravity. Chosen in the first-run wizard and in Settings,
+  stored in `~/.orchestra/conductor.json`; the core adapts each CLI's output to one event stream, so the chat
+  works the same whichever agent conducts.
+- Phone companion server (`companion.rs`): TLS server on a random port with a self-signed certificate, mDNS
+  announcement, pairing by token or short code (5-minute TTL, rate limited), WebSocket with bearer auth, device
+  registry and revocation, autostart. The phone client itself ships in a later release.
+- Platform layer (`platform.rs`): executors can run in a built-in PTY runner without tmux, shell and terminal
+  commands resolved per OS, Windows and Linux builds (`msi`, `nsis`, `deb`, `appimage`) in the release workflow,
+  CI on macOS, Windows and Linux.
+
+### Changed
+- Content Security Policy allows `frame-src` for localhost and the asset protocol for images and documents.
+- Setup screen reports a warning instead of a failure where tmux is not available.
+
 ## 0.2.2 — 2026-10-26
 
 ### Added

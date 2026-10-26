@@ -17,13 +17,13 @@
 - [ ] Перевод ошибок ядра (сейчас только по-русски) под язык интерфейса
 
 ## In progress
-- [ ] v0.3 · выбор дирижёра: Claude Code / Codex CLI / Antigravity (`conductor.json`, адаптеры CLI с нормализацией
-  событий к формату stream-json, шаг «Дирижёр» в мастере, радиогруппа в настройках, обобщённые тексты) — Claude,
-  ворктри `conductor-choice`, `docs/TASK-conductor-choice.md` (26.10.2026)
 
 ## Review
 
 ## Done
+- [x] v0.3 · выбор дирижёра Claude Code / Codex CLI / Antigravity: `conductor.json`, адаптеры CLI (Codex JSONL → stream-json),
+  шаг «Дирижёр» в мастере, радиогруппа в настройках, аватар дирижёра в чате, тексты без привязки к Claude Code;
+  мёрж `conductor-choice` → main `3f99cd0` (26.10.2026)
 - [x] v0.3 · платформенный слой `platform.rs`: PTY-раннер исполнителей без tmux (`portable-pty`, буфер 2000 строк,
   `runner: "pty"` в `jobs.json`), `open_in_terminal`/оболочка по ОС, матрица `release.yml` macOS/Windows/Linux
   (msi+nsis, deb+appimage) и `ci.yml` на трёх ОС; мёрж `platform` → main `a82f411` (26.10.2026)
