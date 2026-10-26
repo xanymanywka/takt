@@ -1,6 +1,6 @@
 [package]
 name = "orchestra"
-version = "0.3.0"
+version = "0.3.1"
 description = "Takt — дирижирование агентами"
 authors = ["xanymanywka"]
 edition = "2024"

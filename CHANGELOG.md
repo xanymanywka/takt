@@ -2,7 +2,7 @@
 
 All notable changes to Takt. Dates are release dates; versions follow the app bundle.
 
-## 0.3.1 — Unreleased
+## 0.3.1 — 2026-10-26
 
 ### Fixed
 - Chat history is now kept per project in `~/.orchestra/chats/<project>.json` and restored when the project
