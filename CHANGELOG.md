@@ -2,6 +2,17 @@
 
 All notable changes to Takt. Dates are release dates; versions follow the app bundle.
 
+## 0.3.1 — Unreleased
+
+### Fixed
+- Chat history is now kept per project in `~/.orchestra/chats/<project>.json` and restored when the project
+  is opened again; before, messages lived only in memory and vanished on restart or project switch.
+- On first open the history is imported from the Claude Code transcript of that project directory
+  (the Takt session when it exists, otherwise the newest conversation), so chats started from the terminal
+  are visible too. Codex / Antigravity conversations are recorded from this version on.
+- Conductor events are scoped to their project: a reply arriving for a background project no longer
+  lands in the active chat.
+
 ## 0.3.0 — 2026-10-26
 
 ### Added

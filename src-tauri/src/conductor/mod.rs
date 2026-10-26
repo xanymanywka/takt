@@ -12,8 +12,10 @@ use serde_json::{Value, json};
 use tauri::{AppHandle, Emitter, State};
 
 mod codex;
+mod history;
 
 use codex::CodexNormalizer;
+pub use history::{chat_history, chat_record};
 
 const ANTHROPIC_ENV: [&str; 3] = [
     "ANTHROPIC_BASE_URL",

@@ -21,6 +21,9 @@
 ## Review
 
 ## Done
+- [x] v0.3.1 · история чата по проектам: `conductor/history.rs`, файлы `~/.orchestra/chats/<проект>.json`,
+  импорт транскрипта Claude Code при первом открытии (сессия Takt, иначе самый свежий разговор папки),
+  события дирижёра привязаны к проекту; IPC `chat_history`/`chat_record`, мок на localStorage (26.10.2026)
 - [x] v0.3 · выбор дирижёра Claude Code / Codex CLI / Antigravity: `conductor.json`, адаптеры CLI (Codex JSONL → stream-json),
   шаг «Дирижёр» в мастере, радиогруппа в настройках, аватар дирижёра в чате, тексты без привязки к Claude Code;
   мёрж `conductor-choice` → main `3f99cd0` (26.10.2026)

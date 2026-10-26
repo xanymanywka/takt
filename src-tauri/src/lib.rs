@@ -15,8 +15,8 @@ use companion::{
     companion_stop,
 };
 use conductor::{
-    ConductorState, conductor_config, conductor_send, conductor_start, conductor_stop,
-    set_conductor,
+    ConductorState, chat_history, chat_record, conductor_config, conductor_send, conductor_start,
+    conductor_stop, set_conductor,
 };
 use jobs::{job_kill, job_new, job_run, job_screen, job_send, list_jobs, write_task};
 use limits::limits;
@@ -53,6 +53,8 @@ pub fn run() {
             conductor_stop,
             conductor_config,
             set_conductor,
+            chat_history,
+            chat_record,
             pty_open,
             pty_write,
             pty_resize,

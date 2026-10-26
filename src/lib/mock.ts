@@ -1,6 +1,7 @@
 import type {
   ConductorAgent,
   ConductorConfig,
+  HistoryMessage,
   Job,
   Limit,
   ModelProviderId,
@@ -347,6 +348,27 @@ export async function conductor_send(projectPath: string, text: string): Promise
 }
 
 export async function conductor_stop(_projectPath: string): Promise<void> {}
+
+const CHAT_STORAGE_PREFIX = 'takt-mock-chat:';
+
+/** В браузере история живёт в localStorage, чтобы переживать перезагрузку страницы. */
+export async function chat_history(projectPath: string): Promise<HistoryMessage[]> {
+  try {
+    const stored = localStorage.getItem(CHAT_STORAGE_PREFIX + projectPath);
+    if (stored) return JSON.parse(stored) as HistoryMessage[];
+  } catch {}
+  return [];
+}
+
+export async function chat_record(projectPath: string, message: HistoryMessage): Promise<void> {
+  const messages = await chat_history(projectPath);
+  const index = messages.findIndex((m) => m.id === message.id);
+  if (index >= 0) messages[index] = message;
+  else messages.push(message);
+  try {
+    localStorage.setItem(CHAT_STORAGE_PREFIX + projectPath, JSON.stringify(messages));
+  } catch {}
+}
 
 const CONDUCTOR_STORAGE_KEY = 'takt-mock-conductor';
 

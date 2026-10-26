@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import {
   CONDUCTOR_AGENTS,
+  chat_history,
+  chat_record,
   conductor_config,
   conductor_send,
   isTauriEnv,
@@ -15,6 +17,7 @@ import {
   setup_status,
   type ConductorAgent,
   type ConductorOption,
+  type HistoryMessage,
   type Job,
   type Limit,
   type PreviewSource,
@@ -51,6 +54,43 @@ export interface ChatMessage {
   text: string;
   time?: string;
   who?: string;
+  /** Момент сообщения в RFC 3339 — по нему считается `time`. */
+  at?: string;
+}
+
+/** Подпись времени: сегодня — только часы и минуты, иначе ещё и дата. */
+function formatTime(at: string | undefined, locale: Locale): string | undefined {
+  if (!at) return undefined;
+  const date = new Date(at);
+  if (Number.isNaN(date.getTime())) return undefined;
+  const sameDay = date.toDateString() === new Date().toDateString();
+  const options: Intl.DateTimeFormatOptions = sameDay
+    ? { hour: '2-digit', minute: '2-digit' }
+    : { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' };
+  return date.toLocaleString(locale, options);
+}
+
+function fromHistory(message: HistoryMessage, locale: Locale, conductor: ConductorAgent): ChatMessage {
+  return {
+    id: message.id,
+    role: message.role,
+    text: message.text,
+    at: message.at,
+    time: message.role === 'user' ? formatTime(message.at, locale) : undefined,
+    who: message.role === 'assistant' ? conductorName(conductor) : undefined,
+  };
+}
+
+function toHistory(message: ChatMessage): HistoryMessage {
+  return { id: message.id, role: message.role, text: message.text, at: message.at };
+}
+
+/** Запись в историю не должна ломать ленту: ошибку только логируем. */
+function record(projectPath: string, message: ChatMessage): void {
+  if (!projectPath) return;
+  chat_record(projectPath, toHistory(message)).catch((err: unknown) => {
+    console.warn('[takt] chat_record', err);
+  });
 }
 
 interface OrchestraState {
@@ -96,6 +136,8 @@ interface OrchestraState {
   toggleTheme: () => void;
   setLocale: (locale: Locale) => void;
   setActiveProject: (project: Project) => void;
+  /** Загружает ленту чата проекта из ~/.orchestra/chats. */
+  loadHistory: (projectPath: string) => Promise<void>;
   setActiveWorktree: (worktree: string) => void;
   sendUserMessage: (text: string) => Promise<void>;
   sendJobAnswer: (jobName: string, answer: string) => Promise<void>;
@@ -268,11 +310,14 @@ export const useStore = create<OrchestraState>((set, get) => ({
     set({ setupRefreshing: true });
     try {
       const [setup, projects] = await Promise.all([setup_status(), list_projects()]);
+      const hadProject = get().activeProject !== null;
       set((state) => ({
         setup,
         projects,
         activeProject: state.activeProject ?? (projects.length > 0 ? projects[0] : null),
       }));
+      const active = get().activeProject;
+      if (!hadProject && active) void get().loadHistory(active.path);
     } catch (err: unknown) {
       set({ error: errorMessage(err) });
     } finally {
@@ -326,19 +371,37 @@ export const useStore = create<OrchestraState>((set, get) => ({
   },
 
   setActiveProject: (activeProject: Project) => {
+    const changed = get().activeProject?.path !== activeProject.path;
     set({ activeProject, previewSources: [], previewActive: null, previewNew: 0 });
+    if (changed) {
+      set({ messages: [] });
+      void get().loadHistory(activeProject.path);
+    }
     void get().loadPreviewSources();
+  },
+
+  loadHistory: async (projectPath: string) => {
+    try {
+      const history = await chat_history(projectPath);
+      const state = get();
+      if (state.activeProject?.path !== projectPath) return;
+      set({ messages: history.map((m) => fromHistory(m, state.locale, state.conductorAgent)) });
+    } catch (err: unknown) {
+      set({ error: errorMessage(err) });
+    }
   },
 
   sendUserMessage: async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
+    const at = new Date().toISOString();
     const userMsg: ChatMessage = {
       id: `usr_${Date.now()}`,
       role: 'user',
       text: trimmed,
-      time: t('chat.justNow'),
+      at,
+      time: formatTime(at, get().locale) ?? t('chat.justNow'),
     };
 
     set((state) => ({
@@ -348,6 +411,7 @@ export const useStore = create<OrchestraState>((set, get) => ({
 
     const project = get().activeProject;
     const projectPath = project?.path || '';
+    record(projectPath, userMsg);
 
     try {
       await conductor_send(projectPath, trimmed);
@@ -588,6 +652,10 @@ export const useStore = create<OrchestraState>((set, get) => ({
           | undefined;
 
         if (!payload || !payload.type) return;
+        const eventProject = e.payload.projectPath || '';
+        // Событие чужого проекта в ленту не попадает, но в его историю записывается.
+        const isActive = !eventProject || get().activeProject?.path === eventProject;
+        const at = new Date().toISOString();
 
         if (payload.type === 'assistant' && payload.message?.content) {
           const msgId = payload.message.id || `msg_${Date.now()}`;
@@ -597,29 +665,28 @@ export const useStore = create<OrchestraState>((set, get) => ({
             .join('\n\n');
 
           if (textBlocks) {
-            set((state) => {
-              const existingIdx = state.messages.findIndex((m) => m.id === msgId);
-              if (existingIdx >= 0) {
-                const updated = [...state.messages];
-                updated[existingIdx] = {
-                  ...updated[existingIdx],
-                  text: textBlocks,
-                };
-                return { messages: updated };
-              } else {
-                return {
-                  messages: [
-                    ...state.messages,
-                    {
-                      id: msgId,
-                      role: 'assistant',
-                      who: conductorName(state.conductorAgent),
-                      text: textBlocks,
-                    },
-                  ],
-                };
-              }
-            });
+            const assistantMsg: ChatMessage = {
+              id: msgId,
+              role: 'assistant',
+              who: conductorName(get().conductorAgent),
+              text: textBlocks,
+              at,
+            };
+            record(eventProject, assistantMsg);
+            if (isActive) {
+              set((state) => {
+                const existingIdx = state.messages.findIndex((m) => m.id === msgId);
+                if (existingIdx >= 0) {
+                  const updated = [...state.messages];
+                  updated[existingIdx] = {
+                    ...updated[existingIdx],
+                    text: textBlocks,
+                  };
+                  return { messages: updated };
+                }
+                return { messages: [...state.messages, assistantMsg] };
+              });
+            }
           }
 
           for (const block of payload.message.content) {
@@ -630,16 +697,16 @@ export const useStore = create<OrchestraState>((set, get) => ({
               } else if (block.name === 'run_command' && block.input?.CommandLine) {
                 label = t('tool.runs', { command: String(block.input.CommandLine) });
               }
-              set((state) => ({
-                messages: [
-                  ...state.messages,
-                  {
-                    id: `tool_${Date.now()}_${Math.random()}`,
-                    role: 'tool',
-                    text: label,
-                  },
-                ],
-              }));
+              const toolMsg: ChatMessage = {
+                id: `tool_${Date.now()}_${Math.random()}`,
+                role: 'tool',
+                text: label,
+                at,
+              };
+              record(eventProject, toolMsg);
+              if (isActive) {
+                set((state) => ({ messages: [...state.messages, toolMsg] }));
+              }
             }
           }
         }

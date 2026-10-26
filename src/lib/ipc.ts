@@ -214,6 +214,27 @@ export async function conductor_stop(projectPath: string): Promise<void> {
   return mock.conductor_stop(projectPath);
 }
 
+/** Сообщение ленты чата, как оно хранится в `~/.orchestra/chats/<проект>.json`. */
+export interface HistoryMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'tool';
+  text: string;
+  /** RFC 3339; у импортированных из старых транскриптов записей может отсутствовать. */
+  at?: string;
+}
+
+/** История чата проекта; при первом обращении импортируется из транскрипта Claude Code. */
+export async function chat_history(projectPath: string): Promise<HistoryMessage[]> {
+  if (isTauriEnv()) return tauriInvoke<HistoryMessage[]>('chat_history', { projectPath });
+  return mock.chat_history(projectPath);
+}
+
+/** Дописывает сообщение; запись с тем же id заменяется. */
+export async function chat_record(projectPath: string, message: HistoryMessage): Promise<void> {
+  if (isTauriEnv()) return tauriInvoke<void>('chat_record', { projectPath, message });
+  return mock.chat_record(projectPath, message);
+}
+
 /** Кто дирижирует: `claude` — Claude Code, `codex` — Codex CLI, `agy` — Antigravity. */
 export type ConductorAgent = 'claude' | 'codex' | 'agy';
 
